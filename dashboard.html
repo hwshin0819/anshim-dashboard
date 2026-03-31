@@ -257,6 +257,50 @@
                 </div>
             </div>
 
+            <!-- 4. DATA TABLE SECTION (Raw Data) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                    <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-blue-500"></i> 신청 상세 내역
+                    </h3>
+                    <div class="relative max-w-sm w-full sm:w-64">
+                        <input type="text" id="tableSearch" placeholder="검색..." oninput="handleTableSearch(this.value)" class="w-full text-sm border shadow-sm rounded-lg pl-9 pr-3 py-2 outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors border-gray-300">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-lg border border-gray-200">
+                    <table class="w-full text-sm text-center border-collapse whitespace-nowrap min-w-[800px]">
+                        <thead class="bg-gray-50 border-b border-gray-200 text-gray-600 font-medium select-none">
+                            <tr>
+                                <th class="w-[15%] px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors" onclick="sortTable('qVal')">신청일시 <i class="fa-solid fa-sort text-gray-400 ml-1 text-xs"></i></th>
+                                <th class="w-[30%] px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors text-left" onclick="sortTable('cVal')">중개업소명 <i class="fa-solid fa-sort text-gray-400 ml-1 text-xs"></i></th>
+                                <th class="w-[10%] px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors" onclick="sortTable('gVal')">주택유형 <i class="fa-solid fa-sort text-gray-400 ml-1 text-xs"></i></th>
+                                <th class="w-[10%] px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors" onclick="sortTable('hVal')">거래유형 <i class="fa-solid fa-sort text-gray-400 ml-1 text-xs"></i></th>
+                                <th class="w-[15%] px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors" onclick="sortTable('sVal')">결제구분 <i class="fa-solid fa-sort text-gray-400 ml-1 text-xs"></i></th>
+                                <th class="w-[20%] px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors" onclick="sortTable('rVal')">진행상태 <i class="fa-solid fa-sort text-gray-400 ml-1 text-xs"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody id="raw-tbody" class="divide-y divide-gray-100">
+                            <!-- JS Injection -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="flex items-center justify-between mt-4">
+                    <div class="text-sm text-gray-500" id="tablePageInfo">
+                        Showing 0 to 0 of 0 entries
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="prevPage()" class="px-3 py-1 border border-gray-300 bg-white rounded text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm" id="btn-prev">이전</button>
+                        <button onclick="nextPage()" class="px-3 py-1 border border-gray-300 bg-white rounded text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm" id="btn-next">다음</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
@@ -286,6 +330,15 @@
             donut: null,
             region: null
         };
+
+        // Table State
+        let tableData = [];
+        let globalPremiumBrokers = new Set();
+        let tableCurrentPage = 1;
+        const TABLE_ROWS_PER_PAGE = 20;
+        let tableSortCol = 'qVal';
+        let tableSortAsc = false;
+        let tableSearchQuery = '';
 
         // ------------------------------------------------------------------
         // INITIALIZATION
@@ -635,11 +688,11 @@
             if (brokerRanks.length === 0) {
                 bHTML = `<tr><td colspan="3" class="py-10 text-gray-400">데이터가 없습니다.</td></tr>`;
             } else {
-                const premiumBrokers = new Set();
+                globalPremiumBrokers = new Set();
                 rawBaseData.forEach(row => {
                     if (row.sVal && (row.sVal.includes('프리미엄(매매)') || row.sVal.includes('이용권(임대)'))) {
                         if (row.cVal && row.cVal !== '미상') {
-                            premiumBrokers.add(row.cVal);
+                            globalPremiumBrokers.add(row.cVal);
                         }
                     }
                 });
@@ -647,7 +700,7 @@
                 brokerRanks.forEach((arr, idx) => {
                     let rNumClass = idx < 3 ? 'text-blue-600 font-extrabold' : 'text-gray-500 font-medium';
                     let agencyName = arr[0];
-                    let pBadge = premiumBrokers.has(agencyName) 
+                    let pBadge = globalPremiumBrokers.has(agencyName) 
                         ? `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#1A73E8] text-white text-[10px] font-bold shrink-0">P</span>` 
                         : '';
                     bHTML += `
@@ -797,6 +850,136 @@
                     }
                 }
             });
+
+            // Update Table Data
+            tableData = dynamicData;
+            tableCurrentPage = 1;
+            renderTable();
+        }
+
+        // ------------------------------------------------------------------
+        // TABLE LOGIC
+        // ------------------------------------------------------------------
+        function getStatusBadgeClasses(rVal) {
+            if (rVal === '증권발급완료') return 'bg-green-100 text-green-700 border-green-200';
+            if (rVal === '신규신청완료' || rVal === '변경신청완료') return 'bg-blue-100 text-blue-700 border-blue-200';
+            if (rVal === '동의대기' || rVal === '신청대기') return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+            if (rVal === '취소' || rVal === '반려') return 'bg-red-100 text-red-700 border-red-200';
+            return 'bg-gray-100 text-gray-700 border-gray-200';
+        }
+
+        function handleTableSearch(val) {
+            tableSearchQuery = val.toLowerCase();
+            tableCurrentPage = 1;
+            renderTable();
+        }
+
+        function sortTable(col) {
+            if (tableSortCol === col) {
+                tableSortAsc = !tableSortAsc;
+            } else {
+                tableSortCol = col;
+                tableSortAsc = true;
+            }
+            renderTable();
+        }
+
+        function prevPage() {
+            if (tableCurrentPage > 1) {
+                tableCurrentPage--;
+                renderTable();
+            }
+        }
+
+        function nextPage() {
+            const filteredData = getTableFilteredData();
+            const maxPage = Math.ceil(filteredData.length / TABLE_ROWS_PER_PAGE);
+            if (tableCurrentPage < maxPage) {
+                tableCurrentPage++;
+                renderTable();
+            }
+        }
+
+        function getTableFilteredData() {
+            let data = tableData;
+
+            if (tableSearchQuery) {
+                data = data.filter(row => {
+                    return (row.qVal && row.qVal.toLowerCase().includes(tableSearchQuery)) ||
+                           (row.cVal && row.cVal.toLowerCase().includes(tableSearchQuery)) ||
+                           (row.gVal && row.gVal.toLowerCase().includes(tableSearchQuery)) ||
+                           (row.hVal && row.hVal.toLowerCase().includes(tableSearchQuery)) ||
+                           (row.sVal && row.sVal.toLowerCase().includes(tableSearchQuery)) ||
+                           (row.rVal && row.rVal.toLowerCase().includes(tableSearchQuery));
+                });
+            }
+
+            data = data.slice().sort((a, b) => {
+                let valA = String(a[tableSortCol] || '');
+                let valB = String(b[tableSortCol] || '');
+                
+                if (valA < valB) return tableSortAsc ? -1 : 1;
+                if (valA > valB) return tableSortAsc ? 1 : -1;
+                return 0;
+            });
+
+            return data;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('raw-tbody');
+            if (!tbody) return;
+
+            const filteredData = getTableFilteredData();
+            const totalItems = filteredData.length;
+            const maxPage = Math.ceil(totalItems / TABLE_ROWS_PER_PAGE) || 1;
+            
+            if (tableCurrentPage > maxPage) tableCurrentPage = maxPage;
+            if (tableCurrentPage < 1) tableCurrentPage = 1;
+
+            const startIndex = (tableCurrentPage - 1) * TABLE_ROWS_PER_PAGE;
+            const endIndex = Math.min(startIndex + TABLE_ROWS_PER_PAGE, totalItems);
+
+            let html = '';
+            if (totalItems === 0) {
+                html = `<tr><td colspan="6" class="py-8 text-gray-500">데이터가 없습니다.</td></tr>`;
+            } else {
+                for (let i = startIndex; i < endIndex; i++) {
+                    const row = filteredData[i];
+                    const isOdd = i % 2 === 0;
+                    const rowClass = isOdd ? 'bg-white' : 'bg-gray-50/50';
+                    const badgeClasses = getStatusBadgeClasses(row.rVal);
+                    
+                    let pBadge = globalPremiumBrokers.has(row.cVal) 
+                        ? `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#1A73E8] text-white text-[10px] font-bold shrink-0 ml-1 mt-[1px]">P</span>` 
+                        : '';
+
+                    html += `<tr class="${rowClass} hover:bg-blue-50/30 transition-colors border-b border-gray-100 last:border-0">
+                        <td class="px-4 py-3 text-gray-600">${row.qVal || '-'}</td>
+                        <td class="px-4 py-3 text-left font-semibold text-gray-800">
+                            <div class="flex items-start">
+                                <span class="truncate">${row.cVal || '-'}</span>
+                                ${pBadge}
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-gray-600">${row.gVal || '-'}</td>
+                        <td class="px-4 py-3 text-gray-600">${row.hVal || '-'}</td>
+                        <td class="px-4 py-3 text-gray-600 text-xs text-left">${row.sVal || '-'}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded-md text-xs font-semibold border ${badgeClasses}">
+                                ${row.rVal || '-'}
+                            </span>
+                        </td>
+                    </tr>`;
+                }
+            }
+            tbody.innerHTML = html;
+
+            document.getElementById('tablePageInfo').innerText = `Showing ${totalItems > 0 ? startIndex + 1 : 0} to ${endIndex} of ${totalItems} entries`;
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            if (btnPrev) btnPrev.disabled = tableCurrentPage === 1;
+            if (btnNext) btnNext.disabled = tableCurrentPage === maxPage;
         }
     </script>
 </body>
