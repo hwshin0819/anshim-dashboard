@@ -635,12 +635,30 @@
             if (brokerRanks.length === 0) {
                 bHTML = `<tr><td colspan="3" class="py-10 text-gray-400">데이터가 없습니다.</td></tr>`;
             } else {
+                const premiumBrokers = new Set();
+                rawBaseData.forEach(row => {
+                    if (row.sVal && (row.sVal.includes('프리미엄(매매)') || row.sVal.includes('이용권(임대)'))) {
+                        if (row.cVal && row.cVal !== '미상') {
+                            premiumBrokers.add(row.cVal);
+                        }
+                    }
+                });
+
                 brokerRanks.forEach((arr, idx) => {
                     let rNumClass = idx < 3 ? 'text-blue-600 font-extrabold' : 'text-gray-500 font-medium';
+                    let agencyName = arr[0];
+                    let pBadge = premiumBrokers.has(agencyName) 
+                        ? `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#1A73E8] text-white text-[10px] font-bold shrink-0">P</span>` 
+                        : '';
                     bHTML += `
                         <tr>
                             <td class="${rNumClass}">${idx+1}</td>
-                            <td class="text-left font-semibold text-gray-800">${arr[0]}</td>
+                            <td class="text-left font-semibold text-gray-800">
+                                <div class="flex items-center gap-1">
+                                    <span class="truncate">${agencyName}</span>
+                                    ${pBadge}
+                                </div>
+                            </td>
                             <td class="text-blue-700 font-bold">${arr[1]}</td>
                         </tr>
                     `;
