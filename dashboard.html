@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>안심케어 대시보드</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js & Datalabels Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <!-- Config / Secrets -->
+    <script src="./config.js"></script>
+
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Pretendard Font -->
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f3f4f6; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        
+        /* Modern Clean Table Styling */
+        .clean-table { width: 100%; border-collapse: collapse; text-align: center; }
+        .clean-table th { background-color: #f9fafb; color: #4b5563; font-weight: 600; padding: 12px 16px; border-bottom: 2px solid #e5e7eb; font-size: 0.875rem; }
+        .clean-table td { padding: 12px 16px; border-bottom: 1px solid #f3f4f6; color: #1f2937; font-size: 0.875rem; }
+        .clean-table tr:hover td { background-color: #f8fafc; }
+        .row-header { font-weight: 600; color: #4b5563; text-align: left; }
+    </style>
+</head>
+
+<body class="text-gray-800 antialiased h-screen flex flex-col overflow-hidden">
+
+    <!-- Top Header Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 z-10 shrink-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center py-3 gap-4">
+                
+                <!-- Title -->
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center text-white shadow-sm"><i class="fa-solid fa-chart-pie"></i></div>
+                    <span class="font-bold text-xl tracking-tight text-gray-900">안심케어 대시보드</span>
+                </div>
+
+                <!-- Date Filters & Actions -->
+                <div class="flex items-center justify-between w-full sm:w-auto gap-4">
+                    <div class="flex flex-wrap bg-gray-100 p-1 rounded-lg items-center gap-1">
+                        <button onclick="setDateFilter('이번달')" id="btn-이번달" class="filter-btn px-4 py-1.5 text-sm font-medium rounded-md transition-all text-gray-600 hover:bg-gray-200">이번달</button>
+                        <button onclick="setDateFilter('전체')" id="btn-전체" class="filter-btn px-4 py-1.5 text-sm font-medium rounded-md transition-all active-btn bg-white text-blue-600 shadow-sm">전체</button>
+                        
+                        <div class="w-px h-5 bg-gray-300 mx-1"></div>
+                        
+                        <select id="sel-year" onchange="setDateFilter('custom', this.value, document.getElementById('sel-month').value)" class="text-sm border-gray-300 rounded-md py-1 pl-2 pr-6 focus:ring-blue-500 focus:border-blue-500 bg-transparent text-gray-700 font-medium cursor-pointer appearance-none transition-all">
+                            <option value="">년도 선택</option>
+                        </select>
+                        <select id="sel-month" onchange="setDateFilter('custom', document.getElementById('sel-year').value, this.value)" class="text-sm border-gray-300 rounded-md py-1 pl-2 pr-6 focus:ring-blue-500 focus:border-blue-500 bg-transparent text-gray-700 font-medium cursor-pointer appearance-none ml-1 transition-all">
+                            <option value="">월 선택</option>
+                            <option value="01">1월</option>
+                            <option value="02">2월</option>
+                            <option value="03">3월</option>
+                            <option value="04">4월</option>
+                            <option value="05">5월</option>
+                            <option value="06">6월</option>
+                            <option value="07">7월</option>
+                            <option value="08">8월</option>
+                            <option value="09">9월</option>
+                            <option value="10">10월</option>
+                            <option value="11">11월</option>
+                            <option value="12">12월</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="loadData()" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm shrink-0">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content (Vertically constrained, globally scrolling wrapper) -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        
+        <!-- Loading Overlay -->
+        <div id="loading" class="fixed inset-0 bg-white/80 z-50 flex flex-col items-center justify-center backdrop-blur-sm hidden">
+            <i class="fa-solid fa-circle-notch fa-spin text-5xl text-blue-500 mb-4 drop-shadow-sm"></i>
+            <p class="text-gray-700 font-semibold text-lg tracking-wide">데이터 동기화 중...</p>
+        </div>
+
+        <div class="max-w-7xl mx-auto flex flex-col gap-6">
+
+            <!-- 1. TOP SECTION (2 columns, 50/50) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- LEFT COLUMN -->
+                <div class="flex flex-col gap-4 sm:gap-6">
+                    <!-- 2x2 SUMMARY CARDS -->
+                    <div class="grid grid-cols-2 gap-4 sm:gap-6 flex-1">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col transition-shadow hover:shadow-md h-full">
+                            <dt class="text-sm font-medium text-gray-500 flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-[#1A73E8]/10 flex items-center justify-center text-[#1A73E8]"><i class="fa-solid fa-layer-group"></i></div>
+                                전체 건수
+                            </dt>
+                            <dd class="mt-auto pt-2 text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight" id="stat-total">0</dd>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col transition-shadow hover:shadow-md h-full">
+                            <dt class="text-sm font-medium text-gray-500 flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-[#3949AB]/10 flex items-center justify-center text-[#3949AB]"><i class="fa-solid fa-house-chimney"></i></div>
+                                매매 건수
+                            </dt>
+                            <dd class="mt-auto pt-2 text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight" id="stat-maemae">0</dd>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col transition-shadow hover:shadow-md h-full">
+                            <dt class="text-sm font-medium text-gray-500 flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-[#00897B]/10 flex items-center justify-center text-[#00897B]"><i class="fa-solid fa-key"></i></div>
+                                임대차 건수
+                            </dt>
+                            <dd class="mt-auto pt-2 text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight" id="stat-imdae">0</dd>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col transition-shadow hover:shadow-md h-full">
+                            <dt class="text-sm font-medium text-gray-500 flex items-center gap-2 text-xs sm:text-sm">
+                                <div class="w-8 h-8 rounded-full bg-[#34A853]/10 flex items-center justify-center text-[#34A853] shrink-0"><i class="fa-solid fa-file-signature"></i></div>
+                                증권발급완료
+                            </dt>
+                            <dd class="mt-auto pt-2 text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight" id="stat-final">0</dd>
+                        </div>
+                    </div>
+
+                    <!-- NEW 3 CARDS (AVERAGES) -->
+                    <div class="grid grid-cols-3 gap-2 sm:gap-4 shrink-0">
+                        <div class="bg-[#1A73E8]/5 rounded-xl border border-[#1A73E8]/20 p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
+                            <dt class="text-[11px] sm:text-xs font-bold text-[#1A73E8]/80 mb-1 truncate">건별결제 평균 객단가</dt>
+                            <dd class="mt-auto text-lg sm:text-xl font-extrabold text-[#1A73E8]" id="stat-avg-unit">0만원</dd>
+                        </div>
+                        <div class="bg-[#00897B]/5 rounded-xl border border-[#00897B]/20 p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
+                            <dt class="text-[11px] sm:text-xs font-bold text-[#00897B]/80 mb-1 truncate">매매 평균 거래금액</dt>
+                            <dd class="mt-auto text-lg sm:text-xl font-extrabold text-[#00897B]" id="stat-avg-maemae">0.0억</dd>
+                        </div>
+                        <div class="bg-[#3949AB]/5 rounded-xl border border-[#3949AB]/20 p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
+                            <dt class="text-[11px] sm:text-xs font-bold text-[#3949AB]/80 mb-1 truncate">전세 평균 보증금</dt>
+                            <dd class="mt-auto text-lg sm:text-xl font-extrabold text-[#3949AB]" id="stat-avg-jeonse">0.0억</dd>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: TABLE (결제 유형별 상세) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full">
+                    <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 shrink-0">
+                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fa-solid fa-money-check-dollar text-blue-500"></i> 결제 유형별 상세
+                        </h3>
+                    </div>
+                    <div class="p-0 overflow-x-auto flex-1 flex items-center bg-white">
+                        <table class="clean-table h-full">
+                            <thead>
+                                <tr>
+                                    <th class="text-left pl-6 w-1/4">구분</th>
+                                    <th class="w-1/4 text-gray-900">합계</th>
+                                    <th class="w-1/4 text-blue-600">매매</th>
+                                    <th class="w-1/4 text-green-600">임대차</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="row-header pl-6">프리미엄</td>
+                                    <td class="font-bold text-gray-900" id="r-pre-sum">0</td>
+                                    <td class="font-medium" id="r-pre-m">0</td>
+                                    <td class="font-medium" id="r-pre-i">0</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-header pl-6">건별 결제</td>
+                                    <td class="font-bold text-gray-900" id="r-sig-sum">0</td>
+                                    <td class="font-medium" id="r-sig-m">0</td>
+                                    <td class="font-medium" id="r-sig-i">0</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-header pl-6">체험권</td>
+                                    <td class="font-bold text-gray-900" id="r-tri-sum">0</td>
+                                    <td class="font-medium" id="r-tri-m">0</td>
+                                    <td class="font-medium" id="r-tri-i">0</td>
+                                </tr>
+                                <tr class="bg-blue-50/50 border-t-2 border-gray-200">
+                                    <td class="row-header pl-6 text-gray-900">합계</td>
+                                    <td class="font-extrabold text-blue-700" id="r-tot-sum">0</td>
+                                    <td class="font-bold text-blue-700" id="r-tot-m">0</td>
+                                    <td class="font-bold text-blue-700" id="r-tot-i">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 2. MIDDLE SECTION (3 columns, 33/33/33) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left: Donut Chart (주택유형) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-[350px]">
+                    <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2 mb-4 shrink-0">
+                        <i class="fa-solid fa-city text-blue-500"></i> 주택유형 비율
+                    </h3>
+                    <div class="flex-1 w-full relative pb-2">
+                        <canvas id="housingDonutChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Middle: Horizontal Bar (지역별 TOP 10) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-[350px]">
+                    <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2 mb-4 shrink-0">
+                        <i class="fa-solid fa-map-location-dot text-blue-500"></i> 지역별 신청 TOP 10
+                    </h3>
+                    <div class="flex-1 w-full relative">
+                        <canvas id="regionBarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Right: Table (중개사무소 TOP 10) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[350px] overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0">
+                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fa-solid fa-users text-blue-500"></i> 중개사무소 TOP 10
+                        </h3>
+                    </div>
+                    <div class="overflow-y-auto flex-1 p-0">
+                        <table class="clean-table align-middle text-sm">
+                            <thead class="sticky top-0 bg-gray-50 z-10 shadow-sm border-b-2">
+                                <tr>
+                                    <th class="w-16 text-center">순위</th>
+                                    <th class="text-left font-bold text-gray-800">사무소명</th>
+                                    <th class="w-20 text-center">건수</th>
+                                </tr>
+                            </thead>
+                            <tbody id="broker-tbody">
+                                <!-- JS Injection -->
+                                <tr><td colspan="3" class="py-10 text-gray-400">데이터가 없습니다.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. BOTTOM SECTION (Full Width Monthly Chart) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-blue-500"></i> 월별 신청 추이
+                    </h3>
+                </div>
+                <div class="h-80 w-full relative">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // ------------------------------------------------------------------
+        // CONFIGURATION
+        // ------------------------------------------------------------------
+        // Register globally loaded Chart DataLabels Plugin 
+        Chart.register(ChartDataLabels);
+
+        const SPREADSHEET_ID = '1lUxjLHDGpLjIG52dlwnKnyXYO0rGLlAZxivOCGgHVJs';
+        const API_KEY = typeof CONFIG !== 'undefined' ? CONFIG.API_KEY : '';
+
+        // ------------------------------------------------------------------
+        // STATE
+        // ------------------------------------------------------------------
+        let rawBaseData = [];     // Unified array of parsed objects 
+        
+        // Filter Memory
+        let activeFilter = '전체'; // '이번달' | '전체' | 'custom'
+        let customYear = '';
+        let customMonth = '';
+        
+        // Chart object memory hooks
+        let chartInstances = {
+            main: null,
+            donut: null,
+            region: null
+        };
+
+        // ------------------------------------------------------------------
+        // INITIALIZATION
+        // ------------------------------------------------------------------
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
+                alert("API_KEY가 설정되지 않았습니다. config.js를 확인해주세요.");
+            } else {
+                loadData();
+            }
+        });
+
+        // ------------------------------------------------------------------
+        // API FETCHING 
+        // ------------------------------------------------------------------
+        async function loadData() {
+            if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') return;
+
+            try {
+                document.getElementById('loading').classList.remove('hidden');
+
+                // Multiplex Data from both Management and Applications
+                const [resM, resR] = await Promise.all([
+                    fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent('관리리스트')}?key=${API_KEY}`),
+                    fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent('신청관리')}?key=${API_KEY}`)
+                ]);
+
+                if (!resM.ok) throw new Error(`관리리스트 HTTP ${resM.status}`);
+                if (!resR.ok) throw new Error(`신청관리 HTTP ${resR.status}`);
+                
+                const jsonM = await resM.json();
+                const jsonR = await resR.json();
+                
+                const yearSet = new Set(); // Global Year Tracker
+
+                function parseSheet(payload, isManagementSheet) {
+                    if (!payload || !payload.values || payload.values.length === 0) return [];
+                    const full = payload.values;
+                    let headerIdx = 0;
+                    while (headerIdx < full.length && (!full[headerIdx] || full[headerIdx].length === 0)) headerIdx++;
+                    if (headerIdx >= full.length) return [];
+
+                    const headers = full[headerIdx];
+                    let map = {};
+
+                    if (isManagementSheet) {
+                        map.C = headers.indexOf('중개업소명') > -1 ? headers.indexOf('중개업소명') : 2;
+                        map.G = headers.indexOf('주택유형') > -1 ? headers.indexOf('주택유형') : 6;
+                        map.H = headers.indexOf('거래유형') > -1 ? headers.indexOf('거래유형') : 7;
+                        map.I = headers.indexOf('소재지') > -1 ? headers.indexOf('소재지') : 8;
+                        map.Q = headers.indexOf('신청일시') > -1 ? headers.indexOf('신청일시') : 16;
+                        map.R = headers.indexOf('진행상태') > -1 ? headers.indexOf('진행상태') : 17;
+                        map.S = headers.indexOf('결제구분') > -1 ? headers.indexOf('결제구분') : 18;
+                        map.Z = headers.indexOf('테스트회원') > -1 ? headers.indexOf('테스트회원') : 25;
+                    } else {
+                        map.C = headers.indexOf('중개업소명') > -1 ? headers.indexOf('중개업소명') : 2;
+                        map.G = headers.indexOf('주택유형') > -1 ? headers.indexOf('주택유형') : 6;
+                        map.H = headers.indexOf('거래유형') > -1 ? headers.indexOf('거래유형') : 7;
+                        map.I = headers.indexOf('소재지') > -1 ? headers.indexOf('소재지') : 8;
+                        map.Q = headers.indexOf('신청일시') > -1 ? headers.indexOf('신청일시') : 14; 
+                        map.R = headers.indexOf('진행상태') > -1 ? headers.indexOf('진행상태') : 15; 
+                        map.S = headers.indexOf('결제구분') > -1 ? headers.indexOf('결제구분') : 16; 
+                        map.Z = headers.indexOf('테스트회원') > -1 ? headers.indexOf('테스트회원') : 22; 
+                    }
+
+                    const extracted = [];
+                    for (let i = headerIdx + 1; i < full.length; i++) {
+                        const row = full[i];
+                        
+                        // Rule 1: Master Test Member check
+                        const testVal = String(row[map.Z] || '').trim().toUpperCase();
+                        if (testVal === 'Y') continue;
+
+                        // Rule 2: Sheet Specific Drops
+                        const statusVal = String(row[map.R] || '').trim();
+                        if (isManagementSheet) {
+                            if (statusVal.includes('취소')) continue;
+                        } else {
+                            if (statusVal === '반려') continue;
+                        }
+
+                        // Year Mining Hook
+                        const qVal = String(row[map.Q] || '').trim();
+                        const regexMatch = qVal.match(/(\d{4})/);
+                        if(regexMatch) yearSet.add(regexMatch[1]);
+
+                        extracted.push({
+                            cVal: String(row[map.C] || '').trim(),
+                            gVal: String(row[map.G] || '').trim(),
+                            hVal: String(row[map.H] || '').trim(),
+                            iVal: String(row[map.I] || '').trim(),
+                            qVal: qVal,
+                            rVal: statusVal,
+                            sVal: String(row[map.S] || '').trim(),
+                            mRaw: String(row[12] || ''),
+                            rRaw: String(row[17] || ''),
+                            isManagementSheet: isManagementSheet
+                        });
+                    }
+                    return extracted;
+                }
+
+                // Compile Unity Base Array
+                const rowsM = parseSheet(jsonM, true);
+                const rowsR = parseSheet(jsonR, false);
+                rawBaseData = [...rowsM, ...rowsR];
+
+                // Build Year Dropdown UI 
+                if (yearSet.size > 0) {
+                    const sortedYears = Array.from(yearSet).sort().reverse();
+                    const selYElement = document.getElementById('sel-year');
+                    selYElement.innerHTML = '<option value="">년도 선택</option>' + sortedYears.map(y => `<option value="${y}">${y}년</option>`).join('');
+                }
+
+                processDataset();
+
+            } catch (error) {
+                console.error('Data loading error:', error);
+                alert("데이터 통합에 오류가 발생했습니다: " + error.message);
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // FILTERING UX STATE
+        // ------------------------------------------------------------------
+        function setDateFilter(filterType, selYearCustom, selMonthCustom) {
+            activeFilter = filterType;
+            
+            if (activeFilter === 'custom') {
+                customYear = selYearCustom || '';
+                customMonth = selMonthCustom || '';
+            } else {
+                document.getElementById('sel-year').value = '';
+                document.getElementById('sel-month').value = '';
+                customYear = '';
+                customMonth = '';
+            }
+
+            // Sync Button Highlights strictly to temporal bounds tracking
+            const btnT = document.getElementById('btn-이번달');
+            const btnA = document.getElementById('btn-전체');
+            const btnClassInactive = 'filter-btn px-4 py-1.5 text-sm font-medium rounded-md transition-all text-gray-600 hover:bg-gray-200';
+            const btnClassActive = 'filter-btn px-4 py-1.5 text-sm font-medium rounded-md transition-all bg-white text-blue-600 shadow-sm';
+            
+            btnT.className = (activeFilter === '이번달') ? btnClassActive : btnClassInactive;
+            btnA.className = (activeFilter === '전체') ? btnClassActive : btnClassInactive;
+
+            // Sync Dropdown Highlight Visuals accurately isolating parameter sets 
+            const selY = document.getElementById('sel-year');
+            const selM = document.getElementById('sel-month');
+            
+            if (activeFilter === 'custom' && customYear) {
+                selY.classList.add('bg-white','text-blue-600','shadow-sm');
+                selY.classList.remove('bg-transparent','text-gray-700');
+            } else {
+                selY.classList.remove('bg-white','text-blue-600','shadow-sm');
+                selY.classList.add('bg-transparent','text-gray-700');
+            }
+
+            if (activeFilter === 'custom' && customMonth) {
+                selM.classList.add('bg-white','text-blue-600','shadow-sm');
+                selM.classList.remove('bg-transparent','text-gray-700');
+            } else {
+                selM.classList.remove('bg-white','text-blue-600','shadow-sm');
+                selM.classList.add('bg-transparent','text-gray-700');
+            }
+
+            processDataset();
+        }
+
+        // ------------------------------------------------------------------
+        // DATA PROCESSING & RENDERING Engine
+        // ------------------------------------------------------------------
+        function processDataset() {
+            const now = new Date();
+            const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+            // Derive specific subdataset filtered safely bridging temporal dependencies natively
+            let dynamicData = rawBaseData.filter(row => {
+                if (activeFilter === '전체') return true;
+                
+                const match = row.qVal.match(/(\d{4})[-./](\d{1,2})/);
+                if (!match) return false;
+
+                const rowYear = match[1];
+                const rowMonth = String(match[2]).padStart(2, '0');
+                const rowMonthStr = `${rowYear}-${rowMonth}`;
+
+                if (activeFilter === '이번달') {
+                    return rowMonthStr === currentMonthStr; 
+                } 
+                else if (activeFilter === 'custom') {
+                    if (customYear && customMonth) {
+                        return rowYear === customYear && rowMonth === customMonth;
+                    } else if (customYear) {
+                        return rowYear === customYear;
+                    } else if (customMonth && !customYear) {
+                        return true; 
+                    }
+                }
+                return true;
+            });
+
+
+            // Prepare State track objects
+            let sumTotal = dynamicData.length;
+            let sumMaemae = 0;
+            let sumImdae = 0;
+            let sumFinalDone = 0;
+
+            let sumUnitPrices = 0; let countUnitPrices = 0;
+            let sumMaemaeM = 0; let countMaemaeM = 0;
+            let sumJeonseM = 0; let countJeonseM = 0;
+
+            const rightTbl = {
+                single: { m: 0, i: 0 },
+                trial:  { m: 0, i: 0 },
+                premium: { m: 0, i: 0 }
+            };
+
+            const timelineMap = {};
+            const brokerMap = {};
+            const housingMap = {};
+            const regionMap = {};
+
+            dynamicData.forEach(row => {
+                const cVal = row.cVal || '미상';
+                const gVal = row.gVal || '미정';
+                const hVal = row.hVal;
+                const iVal = row.iVal;
+                const qVal = row.qVal;
+                const rVal = row.rVal;
+                const sVal = row.sVal;
+
+                // Restrict 증권발급완료 securely to Management checks only 
+                if (row.isManagementSheet && rVal === '증권발급완료') sumFinalDone++;
+                
+                let isM = (hVal === '매매');
+                let isI = (hVal === '전세' || hVal === '월세');
+                if (isM) sumMaemae++;
+                if (isI) sumImdae++;
+
+                if (row.isManagementSheet) {
+                    const parseNum = (str) => {
+                        const num = Number(str.replace(/,/g, ''));
+                        return isNaN(num) ? null : num;
+                    };
+                    const mNum = parseNum(row.mRaw);
+                    const rNum = parseNum(row.rRaw);
+
+                    if (sVal.includes('일반결제(단건)') && rNum !== null && rNum > 0) {
+                        sumUnitPrices += rNum;
+                        countUnitPrices++;
+                    }
+                    if (hVal === '매매' && mNum !== null && mNum > 0) {
+                        sumMaemaeM += mNum;
+                        countMaemaeM++;
+                    }
+                    if (hVal === '전세' && mNum !== null && mNum > 0) {
+                        sumJeonseM += mNum;
+                        countJeonseM++;
+                    }
+                }
+
+                if (sVal.includes('일반결제(단건)')) {
+                    if (isM) rightTbl.single.m++;
+                    if (isI) rightTbl.single.i++;
+                } else if (sVal.includes('체험권')) {
+                    if (isM) rightTbl.trial.m++;
+                    if (isI) rightTbl.trial.i++;
+                } else if (sVal.includes('프리미엄(매매)')) {
+                    if (isM) rightTbl.premium.m++;
+                } else if (sVal.includes('이용권(임대)')) {
+                    if (isI) rightTbl.premium.i++;
+                }
+
+                brokerMap[cVal] = (brokerMap[cVal] || 0) + 1;
+                housingMap[gVal] = (housingMap[gVal] || 0) + 1;
+                
+                let addrParts = iVal.split(/\s+/);
+                let regionKey = '기타/미상';
+                if (addrParts.length >= 2) {
+                    regionKey = addrParts[1];
+                } else if (addrParts.length === 1 && addrParts[0] !== '') {
+                    regionKey = addrParts[0];
+                }
+                regionMap[regionKey] = (regionMap[regionKey] || 0) + 1;
+
+
+                const match = qVal.match(/(\d{4})[-./](\d{1,2})/);
+                if (match) {
+                    const rowMonthStr = `${match[1]}-${String(match[2]).padStart(2, '0')}`;
+                    if (!timelineMap[rowMonthStr]) timelineMap[rowMonthStr] = { pm: 0, sm: 0, pi: 0, si: 0, etc: 0 };
+                    
+                    if (isM && sVal.includes('프리미엄(매매)')) {
+                        timelineMap[rowMonthStr].pm++;
+                    } else if (isM && sVal.includes('일반결제(단건)')) {
+                        timelineMap[rowMonthStr].sm++;
+                    } else if (isI && sVal.includes('이용권(임대)')) {
+                        timelineMap[rowMonthStr].pi++;
+                    } else if (isI && sVal.includes('일반결제(단건)')) {
+                        timelineMap[rowMonthStr].si++;
+                    } else {
+                        timelineMap[rowMonthStr].etc++;
+                    }
+                }
+            });
+
+
+            // ======= INJECT HTML =======
+            document.getElementById('stat-total').innerText = sumTotal;
+            document.getElementById('stat-maemae').innerText = sumMaemae;
+            document.getElementById('stat-imdae').innerText = sumImdae;
+            document.getElementById('stat-final').innerText = sumFinalDone;
+
+            document.getElementById('stat-avg-unit').innerText = countUnitPrices > 0 ? Math.round(sumUnitPrices / countUnitPrices / 10000).toLocaleString() + '만원' : '0만원';
+            document.getElementById('stat-avg-maemae').innerText = countMaemaeM > 0 ? (sumMaemaeM / countMaemaeM / 100000000).toFixed(1) + '억' : '0.0억';
+            document.getElementById('stat-avg-jeonse').innerText = countJeonseM > 0 ? (sumJeonseM / countJeonseM / 100000000).toFixed(1) + '억' : '0.0억';
+
+            document.getElementById('r-pre-m').innerText = rightTbl.premium.m;
+            document.getElementById('r-pre-i').innerText = rightTbl.premium.i;
+            document.getElementById('r-pre-sum').innerText = rightTbl.premium.m + rightTbl.premium.i;
+
+            document.getElementById('r-sig-m').innerText = rightTbl.single.m;
+            document.getElementById('r-sig-i').innerText = rightTbl.single.i;
+            document.getElementById('r-sig-sum').innerText = rightTbl.single.m + rightTbl.single.i;
+
+            document.getElementById('r-tri-m').innerText = rightTbl.trial.m;
+            document.getElementById('r-tri-i').innerText = rightTbl.trial.i;
+            document.getElementById('r-tri-sum').innerText = rightTbl.trial.m + rightTbl.trial.i;
+
+            const totM = rightTbl.single.m + rightTbl.trial.m + rightTbl.premium.m;
+            const totI = rightTbl.single.i + rightTbl.trial.i + rightTbl.premium.i;
+            document.getElementById('r-tot-m').innerText = totM;
+            document.getElementById('r-tot-i').innerText = totI;
+            document.getElementById('r-tot-sum').innerText = totM + totI;
+
+
+            // ======= GENERATE AND RENDER MIDDLE COLUMNS =======
+            const topN = (mapObj, n=10) => Object.entries(mapObj).sort((a,b) => b[1] - a[1]).slice(0, n);
+
+            // 1. Right: Broker HTML Table 
+            const brokerRanks = topN(brokerMap, 10);
+            let bHTML = '';
+            if (brokerRanks.length === 0) {
+                bHTML = `<tr><td colspan="3" class="py-10 text-gray-400">데이터가 없습니다.</td></tr>`;
+            } else {
+                brokerRanks.forEach((arr, idx) => {
+                    let rNumClass = idx < 3 ? 'text-blue-600 font-extrabold' : 'text-gray-500 font-medium';
+                    bHTML += `
+                        <tr>
+                            <td class="${rNumClass}">${idx+1}</td>
+                            <td class="text-left font-semibold text-gray-800">${arr[0]}</td>
+                            <td class="text-blue-700 font-bold">${arr[1]}</td>
+                        </tr>
+                    `;
+                });
+            }
+            document.getElementById('broker-tbody').innerHTML = bHTML;
+
+            // 2. Left: Housing Donut Chart
+            const housingArr = topN(housingMap, 10);
+            const housingLabels = housingArr.map(i => i[0]);
+            const housingVals = housingArr.map(i => i[1]);
+            const housingColors = ['#1A73E8', '#34A853', '#FBBC04', '#00897B', '#29B6F6', '#3949AB', '#7986CB', '#00ACC1'];
+            
+            if (chartInstances.donut) chartInstances.donut.destroy();
+            chartInstances.donut = new Chart(document.getElementById('housingDonutChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: housingLabels,
+                    datasets: [{ data: housingVals, backgroundColor: housingColors, hoverOffset: 4, borderWidth: 1, borderColor: '#fff' }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: {family: 'Pretendard', size: 12} } },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: 'bold', family: 'Pretendard', size: 13 },
+                            textStrokeColor: 'rgba(0,0,0,0.5)', textStrokeWidth: 2,
+                            formatter: (val, ctx) => {
+                                let total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                return ((val * 100) / total).toFixed(1) + "%";
+                            }
+                        }
+                    }
+                }
+            });
+
+
+            // 3. Center: Region Horizontal Bar Chart
+            const regionArr = topN(regionMap, 10);
+            const regionLabels = regionArr.map(i => i[0]);
+            const regionVals = regionArr.map(i => i[1]);
+
+            if (chartInstances.region) chartInstances.region.destroy();
+            chartInstances.region = new Chart(document.getElementById('regionBarChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: regionLabels,
+                    datasets: [{ label: '건수', data: regionVals, backgroundColor: '#1A73E8', borderRadius: 4 }]
+                },
+                options: {
+                    indexAxis: 'y', 
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { display: false, beginAtZero: true }, 
+                        y: { grid: { display: false }, border: { display: false }, ticks: { font: { family: 'Pretendard', weight: 600 } } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: 'rgba(17, 24, 39, 0.9)', titleFont: { family: 'Pretendard' } },
+                        datalabels: {
+                            color: '#374151',
+                            anchor: 'end', align: 'end', offset: 4,
+                            font: { weight: 'bold', family: 'Pretendard', size: 12 },
+                            formatter: (val) => val
+                        }
+                    },
+                    layout: { padding: { right: 30 } } 
+                }
+            });
+
+
+            // ======= MAIN MONTHLY CHART =======
+            let timelineKeys = Object.keys(timelineMap).sort();
+            if (timelineKeys.length === 0) timelineKeys = [currentMonthStr];
+            
+            const minStr = timelineKeys[0];
+            const maxStr = timelineKeys[timelineKeys.length - 1];
+            let [minY, minM] = minStr.split('-').map(Number);
+            let [maxY, maxM] = maxStr.split('-').map(Number);
+            
+            const cLabels = []; 
+            const cDataPM = []; const cDataSM = []; 
+            const cDataPI = []; const cDataSI = []; 
+            const cDataEtc = [];
+            
+            while(minY < maxY || (minY === maxY && minM <= maxM)) {
+                let mStr = `${minY}-${String(minM).padStart(2, '0')}`;
+                cLabels.push(mStr);
+                
+                cDataPM.push(timelineMap[mStr] ? timelineMap[mStr].pm : 0);
+                cDataSM.push(timelineMap[mStr] ? timelineMap[mStr].sm : 0);
+                cDataPI.push(timelineMap[mStr] ? timelineMap[mStr].pi : 0);
+                cDataSI.push(timelineMap[mStr] ? timelineMap[mStr].si : 0);
+                cDataEtc.push(timelineMap[mStr] ? timelineMap[mStr].etc : 0);
+                
+                minM++;
+                if (minM > 12) { minM = 1; minY++; }
+            }
+
+            if (chartInstances.main) chartInstances.main.destroy();
+            chartInstances.main = new Chart(document.getElementById('mainChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: cLabels,
+                    datasets: [
+                        { label: '프리미엄 매매', data: cDataPM, backgroundColor: '#1A73E8', barPercentage: 0.6 },
+                        { label: '건별결제 매매', data: cDataSM, backgroundColor: '#29B6F6', barPercentage: 0.6 },
+                        { label: '프리미엄 임대차', data: cDataPI, backgroundColor: '#00897B', barPercentage: 0.6 },
+                        { label: '건별결제 임대차', data: cDataSI, backgroundColor: '#34A853', barPercentage: 0.6 },
+                        { label: '기타', data: cDataEtc, backgroundColor: '#FBBC04', barPercentage: 0.6 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    layout: { padding: { top: 20 } }, 
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, grid: { color: '#f3f4f6' }, border: { display: false } }
+                    },
+                    plugins: {
+                        legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8, font: { family: 'Pretendard', weight: 500 } } },
+                        tooltip: { backgroundColor: 'rgba(17, 24, 39, 0.9)', padding: 12, titleFont: { size: 14, family: 'Pretendard' }, bodyFont: { size: 13, family: 'Pretendard' } },
+                        datalabels: {
+                            color: (ctx) => {
+                                const bg = ctx.dataset.backgroundColor;
+                                // Dark text on light bars for contrast
+                                if (bg === '#29B6F6' || bg === '#FBBC04') return '#1e293b';
+                                return '#ffffff'; 
+                            },
+                            anchor: 'center', align: 'center',
+                            font: { weight: 'bold', family: 'Pretendard', size: 11 },
+                            formatter: (val) => val > 0 ? val : '' 
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

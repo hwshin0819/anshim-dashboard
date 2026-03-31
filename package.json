@@ -1,0 +1,15 @@
+{
+  "name": "anshim-dashboard-automation",
+  "version": "1.0.0",
+  "description": "Playwright automation script for downloading Excel files and uploading to Google Sheets.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "googleapis": "^144.0.0",
+    "playwright": "^1.42.1",
+    "xlsx": "^0.18.5"
+  }
+}
