@@ -822,10 +822,10 @@
                     labels: cLabels,
                     datasets: [
                         { label: '프리미엄 매매', data: cDataPM, backgroundColor: '#1A73E8', barPercentage: 0.6 },
-                        { label: '건별결제 매매', data: cDataSM, backgroundColor: '#29B6F6', barPercentage: 0.6 },
-                        { label: '프리미엄 임대차', data: cDataPI, backgroundColor: '#00897B', barPercentage: 0.6 },
-                        { label: '건별결제 임대차', data: cDataSI, backgroundColor: '#34A853', barPercentage: 0.6 },
-                        { label: '기타', data: cDataEtc, backgroundColor: '#FBBC04', barPercentage: 0.6 }
+                        { label: '프리미엄 임대차', data: cDataPI, backgroundColor: '#74B3F8', barPercentage: 0.6 },
+                        { label: '건별결제 매매', data: cDataSM, backgroundColor: '#A8C8F8', barPercentage: 0.6 },
+                        { label: '건별결제 임대차', data: cDataSI, backgroundColor: '#81C995', barPercentage: 0.6 },
+                        { label: '기타', data: cDataEtc, backgroundColor: '#BDC1C6', barPercentage: 0.6 }
                     ]
                 },
                 options: {
@@ -843,8 +843,8 @@
                             color: (ctx) => {
                                 const bg = ctx.dataset.backgroundColor;
                                 // Dark text on light bars for contrast
-                                if (bg === '#29B6F6' || bg === '#FBBC04') return '#1e293b';
-                                return '#ffffff'; 
+                                if (bg === '#1A73E8' || bg === '#74B3F8') return '#ffffff';
+                                return '#1e293b'; 
                             },
                             anchor: 'center', align: 'center',
                             font: { weight: 'bold', family: 'Pretendard', size: 11 },
