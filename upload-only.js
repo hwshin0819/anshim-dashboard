@@ -31,7 +31,26 @@ async function uploadToGoogleSheets() {
     const worksheet = workbook.Sheets[firstSheetName];
     
     // Convert to 2D array: array of arrays avoiding sparse rows
-    const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+    let data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+    // Exclude Column B(1), D(3), E(4), F(5)
+    const excludedIndices = new Set([1, 3, 4, 5]);
+
+    if (sheetName === '관리리스트' && data.length > 0) {
+      const headers = data[0];
+      const additionalCols = [
+        '계약일', '잔금일', '임대차만료일', '결제일시', '환불일시', 
+        '결제상태', '청약번호', '증권번호', '발급완료일', '버전'
+      ];
+      additionalCols.forEach(colName => {
+        const idx = headers.indexOf(colName);
+        if (idx !== -1) {
+          excludedIndices.add(idx);
+        }
+      });
+    }
+
+    data = data.map(row => row.filter((_, index) => !excludedIndices.has(index)));
 
     if (!data || data.length === 0) {
       console.log(`No data found in ${filePath}. Skipping upload.`);
