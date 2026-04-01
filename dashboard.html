@@ -700,9 +700,12 @@
                 brokerRanks.forEach((arr, idx) => {
                     let rNumClass = idx < 3 ? 'text-blue-600 font-extrabold' : 'text-gray-500 font-medium';
                     let agencyName = arr[0];
-                    let pBadge = globalPremiumBrokers.has(agencyName) 
-                        ? `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#34A853] text-white text-[10px] font-bold shrink-0">P</span>` 
-                        : '';
+                    let pBadge = '';
+                    if (agencyName && agencyName !== '미상' && agencyName !== '-') {
+                        pBadge = globalPremiumBrokers.has(agencyName) 
+                            ? `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#1A73E8] text-white text-[10px] font-bold shrink-0">P</span>` 
+                            : `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#34A853] text-white text-[10px] font-bold shrink-0">N</span>`;
+                    }
                     bHTML += `
                         <tr>
                             <td class="${rNumClass}">${idx+1}</td>
@@ -950,9 +953,12 @@
                     const rowClass = isOdd ? 'bg-white' : 'bg-gray-50/50';
                     const badgeClasses = getStatusBadgeClasses(row.rVal);
                     
-                    let pBadge = globalPremiumBrokers.has(row.cVal) 
-                        ? `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#34A853] text-white text-[10px] font-bold shrink-0 ml-1 mt-[1px]">P</span>` 
-                        : '';
+                    let pBadge = '';
+                    if (row.cVal && row.cVal !== '미상' && row.cVal !== '-') {
+                        pBadge = globalPremiumBrokers.has(row.cVal) 
+                            ? `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#1A73E8] text-white text-[10px] font-bold shrink-0 ml-1 mt-[1px]">P</span>` 
+                            : `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#34A853] text-white text-[10px] font-bold shrink-0 ml-1 mt-[1px]">N</span>`;
+                    }
 
                     html += `<tr class="${rowClass} hover:bg-blue-50/30 transition-colors border-b border-gray-100 last:border-0">
                         <td class="px-4 py-3 text-gray-600">${row.qVal || '-'}</td>
