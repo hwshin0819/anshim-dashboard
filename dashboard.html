@@ -396,14 +396,16 @@
                     let map = {};
 
                     if (isManagementSheet) {
-                        map.C = headers.indexOf('중개업소명') > -1 ? headers.indexOf('중개업소명') : 2;
-                        map.G = headers.indexOf('주택유형') > -1 ? headers.indexOf('주택유형') : 6;
-                        map.H = headers.indexOf('거래유형') > -1 ? headers.indexOf('거래유형') : 7;
-                        map.I = headers.indexOf('소재지') > -1 ? headers.indexOf('소재지') : 8;
-                        map.Q = headers.indexOf('신청일시') > -1 ? headers.indexOf('신청일시') : 16;
-                        map.R = headers.indexOf('진행상태') > -1 ? headers.indexOf('진행상태') : 17;
-                        map.S = headers.indexOf('결제구분') > -1 ? headers.indexOf('결제구분') : 18;
-                        map.Z = headers.indexOf('테스트회원') > -1 ? headers.indexOf('테스트회원') : 25;
+                        map.C = headers.indexOf('중개업소명') > -1 ? headers.indexOf('중개업소명') : 1;
+                        map.G = headers.indexOf('주택유형') > -1 ? headers.indexOf('주택유형') : 2;
+                        map.H = headers.indexOf('거래유형') > -1 ? headers.indexOf('거래유형') : 3;
+                        map.I = headers.indexOf('소재지') > -1 ? headers.indexOf('소재지') : 4;
+                        map.Q = headers.indexOf('신청일시') > -1 ? headers.indexOf('신청일시') : 10;
+                        map.R = headers.indexOf('진행상태') > -1 ? headers.indexOf('진행상태') : 11;
+                        map.S = headers.indexOf('결제구분') > -1 ? headers.indexOf('결제구분') : 12;
+                        map.Z = headers.indexOf('테스트회원') > -1 ? headers.indexOf('테스트회원') : 21;
+                        map.M = headers.indexOf('매매금액') > -1 ? headers.indexOf('매매금액') : 8;
+                        map.N = headers.indexOf('결제금액') > -1 ? headers.indexOf('결제금액') : 13;
                     } else {
                         map.C = headers.indexOf('중개업소명') > -1 ? headers.indexOf('중개업소명') : 2;
                         map.G = headers.indexOf('주택유형') > -1 ? headers.indexOf('주택유형') : 6;
@@ -413,6 +415,8 @@
                         map.R = headers.indexOf('진행상태') > -1 ? headers.indexOf('진행상태') : 15; 
                         map.S = headers.indexOf('결제구분') > -1 ? headers.indexOf('결제구분') : 16; 
                         map.Z = headers.indexOf('테스트회원') > -1 ? headers.indexOf('테스트회원') : 22; 
+                        map.M = 12;
+                        map.N = 17;
                     }
 
                     const extracted = [];
@@ -444,8 +448,8 @@
                             qVal: qVal,
                             rVal: statusVal,
                             sVal: String(row[map.S] || '').trim(),
-                            mRaw: String(row[12] || ''),
-                            rRaw: String(row[17] || ''),
+                            mRaw: String(row[map.M] || ''),
+                            rRaw: String(row[map.N] || ''),
                             isManagementSheet: isManagementSheet
                         });
                     }
