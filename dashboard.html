@@ -325,8 +325,8 @@
         let customMonth = '';
         
         // Chart object memory hooks
+        let monthlyChart = null;
         let chartInstances = {
-            main: null,
             donut: null,
             region: null
         };
@@ -815,8 +815,8 @@
                 if (minM > 12) { minM = 1; minY++; }
             }
 
-            if (chartInstances.main) chartInstances.main.destroy();
-            chartInstances.main = new Chart(document.getElementById('mainChart').getContext('2d'), {
+            if (monthlyChart) monthlyChart.destroy();
+            monthlyChart = new Chart(document.getElementById('mainChart').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: cLabels,
