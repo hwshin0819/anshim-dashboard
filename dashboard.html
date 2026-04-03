@@ -704,11 +704,84 @@
             });
 
 
+            // --- MoM Calculation ---
+            let latestMonth = '';
+            rawBaseData.forEach(r => {
+                if (!r.qVal) return;
+                const match = r.qVal.match(/(\d{4})[-./](\d{1,2})/);
+                if (match) {
+                    const mStr = `${match[1]}-${String(match[2]).padStart(2, '0')}`;
+                    if (mStr > latestMonth) latestMonth = mStr;
+                }
+            });
+
+            let prevMonth = '';
+            if (latestMonth) {
+                const [y, m] = latestMonth.split('-');
+                let d = new Date(Number(y), Number(m) - 1, 1);
+                d.setMonth(d.getMonth() - 1);
+                prevMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            }
+
+            let currStats = { total: 0, maemae: 0, imdae: 0, final: 0 };
+            let prevStats = { total: 0, maemae: 0, imdae: 0, final: 0 };
+
+            rawBaseData.forEach(r => {
+                if (!r.qVal) return;
+                const match = r.qVal.match(/(\d{4})[-./](\d{1,2})/);
+                if (!match) return;
+                const mStr = `${match[1]}-${String(match[2]).padStart(2, '0')}`;
+                
+                let isCurr = (mStr === latestMonth);
+                let isPrev = (mStr === prevMonth);
+
+                if (!isCurr && !isPrev) return;
+
+                let isM = (r.hVal === '매매');
+                let isI = (r.hVal === '전세' || r.hVal === '월세');
+                let isFinal = (r.isManagementSheet && r.rVal === '증권발급완료');
+
+                if (isCurr) {
+                    currStats.total++;
+                    if (isM) currStats.maemae++;
+                    if (isI) currStats.imdae++;
+                    if (isFinal) currStats.final++;
+                } else if (isPrev) {
+                    prevStats.total++;
+                    if (isM) prevStats.maemae++;
+                    if (isI) prevStats.imdae++;
+                    if (isFinal) prevStats.final++;
+                }
+            });
+
+            const renderMoM = (curr, prev, elemId) => {
+                const diff = curr - prev;
+                let html = '';
+                if (diff > 0) {
+                    html = `<span class="text-[#1A73E8] text-sm font-bold mt-1 inline-block">+${diff}</span>`;
+                } else if (diff < 0) {
+                    html = `<span class="text-[#EA4335] text-sm font-bold mt-1 inline-block">△${Math.abs(diff)}</span>`;
+                } else {
+                    html = `<span class="text-gray-400 text-sm font-semibold mt-1 inline-block">0</span>`;
+                }
+                const elem = document.getElementById(elemId);
+                if (elem && elem.parentNode) {
+                    const ex = elem.parentNode.querySelector('.mom-stat');
+                    if(ex) ex.remove();
+                    elem.parentNode.insertAdjacentHTML('beforeend', `<div class="mom-stat">${html}</div>`);
+                }
+            };
+
             // ======= INJECT HTML =======
             document.getElementById('stat-total').innerText = sumTotal;
             document.getElementById('stat-maemae').innerText = sumMaemae;
             document.getElementById('stat-imdae').innerText = sumImdae;
             document.getElementById('stat-final').innerText = sumFinalDone;
+
+            renderMoM(currStats.total, prevStats.total, 'stat-total');
+            renderMoM(currStats.maemae, prevStats.maemae, 'stat-maemae');
+            renderMoM(currStats.imdae, prevStats.imdae, 'stat-imdae');
+            renderMoM(currStats.final, prevStats.final, 'stat-final');
 
             document.getElementById('stat-avg-unit').innerText = countUnitPrices > 0 ? Math.round(sumUnitPrices / countUnitPrices / 10000).toLocaleString() + '만원' : '0만원';
             document.getElementById('stat-avg-maemae').innerText = countMaemaeM > 0 ? (sumMaemaeM / countMaemaeM / 100000000).toFixed(1) + '억' : '0.0억';

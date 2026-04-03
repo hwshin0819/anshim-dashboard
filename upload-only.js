@@ -31,26 +31,59 @@ async function uploadToGoogleSheets() {
     const worksheet = workbook.Sheets[firstSheetName];
     
     // Convert to 2D array: array of arrays avoiding sparse rows
-    let data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+    let data = xlsx.utils.sheet_to_json(worksheet, { 
+      header: 1, 
+      defval: '',
+      range: 1  // Start from row 2 (0-indexed) since row 1 is empty
+    });
 
-    // Exclude Column B(1), D(3), E(4), F(5)
-    const excludedIndices = new Set([1, 3, 4, 5]);
-
-    if (sheetName === '관리리스트' && data.length > 0) {
+    if (data.length > 0) {
       const headers = data[0];
-      const additionalCols = [
-        '계약일', '잔금일', '임대차만료일', '결제일시', '환불일시', 
-        '결제상태', '청약번호', '증권번호', '발급완료일', '버전'
-      ];
-      additionalCols.forEach(colName => {
-        const idx = headers.indexOf(colName);
+      console.log(`\n[${sheetName}] Original Excel headers:`, headers);
+
+      let columnsToKeep = [];
+      
+      if (sheetName === '신청관리') {
+        columnsToKeep = [
+          '중개업소명', '주택유형', '거래유형', '소재지', '매매/보증 금액',
+          '신청일시', '진행상태', '결제구분', '결제금액', '테스트회원'
+        ];
+      } else if (sheetName === '관리리스트') {
+        columnsToKeep = [
+          '중개업소명', '주택유형', '거래유형', '소재지', '매매금액',
+          '신청일시', '진행상태', '결제구분', '결제금액', '테스트회원'
+        ];
+      }
+
+      const keepIndices = [];
+      const keptHeaderNames = [];
+      
+      columnsToKeep.forEach(colName => {
+        const idx = headers.findIndex(h => typeof h === 'string' && h.trim() === colName);
         if (idx !== -1) {
-          excludedIndices.add(idx);
+          keepIndices.push(idx);
+          keptHeaderNames.push(headers[idx]);
+        } else {
+          console.warn(`[${sheetName}] WARNING: Setup expected column '${colName}' but it was not found in Excel!`);
         }
       });
-    }
 
-    data = data.map(row => row.filter((_, index) => !excludedIndices.has(index)));
+      console.log(`[${sheetName}] Kept columns:`, keptHeaderNames);
+
+      const locationKeptIdx = keptHeaderNames.indexOf('소재지');
+
+      data = data.map((row, rowIndex) => keepIndices.map((idx, keptIdx) => {
+        let val = row[idx] !== undefined ? row[idx] : '';
+        
+        // Truncate 소재지 column (address) to first 3 words, skipping the header row
+        if (rowIndex > 0 && keptIdx === locationKeptIdx && typeof val === 'string' && val.trim() !== '') {
+          const words = val.trim().split(' ');
+          val = words.slice(0, 3).join(' ');
+        }
+        
+        return val;
+      }));
+    }
 
     if (!data || data.length === 0) {
       console.log(`No data found in ${filePath}. Skipping upload.`);
