@@ -708,7 +708,9 @@
             document.getElementById('stat-total').innerText = sumTotal;
             document.getElementById('stat-maemae').innerText = sumMaemae;
             document.getElementById('stat-imdae').innerText = sumImdae;
-            document.getElementById('stat-final').innerText = sumFinalDone;
+            
+            const issueRate = sumTotal > 0 ? ((sumFinalDone / sumTotal) * 100).toFixed(1) : '0.0';
+            document.getElementById('stat-final').innerHTML = `${sumFinalDone} <span class="text-lg sm:text-xl text-gray-500 font-semibold tracking-normal align-baseline ml-1">(발급률 ${issueRate}%)</span>`;
 
             document.getElementById('stat-avg-unit').innerText = countUnitPrices > 0 ? Math.round(sumUnitPrices / countUnitPrices / 10000).toLocaleString() + '만원' : '0만원';
             document.getElementById('stat-avg-maemae').innerText = countMaemaeM > 0 ? (sumMaemaeM / countMaemaeM / 100000000).toFixed(1) + '억' : '0.0억';
