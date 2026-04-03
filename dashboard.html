@@ -209,6 +209,54 @@
 
             </div>
 
+            <!-- 1.5 CALENDAR SECTION -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Calendar Widget -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[400px]">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center shrink-0">
+                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-days text-blue-500"></i> 잔금일 캘린더
+                        </h3>
+                        <div class="flex items-center gap-3">
+                            <button onclick="calPrev()" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-500 hover:bg-white hover:text-blue-600 hover:shadow-sm transition"><i class="fa-solid fa-chevron-left"></i></button>
+                            <span id="cal-month-title" class="font-bold text-gray-700 min-w-[70px] text-center">YYYY.MM</span>
+                            <button onclick="calNext()" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-500 hover:bg-white hover:text-blue-600 hover:shadow-sm transition"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="flex-1 flex flex-col p-4 bg-white">
+                        <div class="grid grid-cols-7 text-center text-xs font-bold text-gray-400 mb-2">
+                            <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+                        </div>
+                        <div id="cal-grid" class="grid grid-cols-7 gap-1 flex-1 text-sm bg-white">
+                            <!-- JS Injection -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar Details Panel -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[400px] overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0">
+                        <h3 id="cal-detail-title" class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fa-solid fa-list text-blue-500"></i> 날짜를 선택해주세요
+                        </h3>
+                    </div>
+                    <div class="overflow-y-auto flex-1 p-0 bg-white">
+                        <table class="clean-table align-middle text-sm w-full">
+                            <thead class="sticky top-0 bg-gray-50 z-10 shadow-sm border-b-2">
+                                <tr>
+                                    <th class="text-left font-bold text-gray-800 pl-6 w-1/2">중개업소명</th>
+                                    <th class="w-1/4 text-center text-gray-600">거래유형</th>
+                                    <th class="w-1/4 text-center text-gray-600">매매금액</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cal-detail-tbody">
+                                <tr><td colspan="3" class="py-10 text-gray-400 text-center">캘린더에서 날짜를 선택하세요.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- 2. MIDDLE SECTION (3 columns, 33/33/33) -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Left: Donut Chart (주택유형) -->
@@ -351,6 +399,10 @@
         let tableSortAsc = false;
         let tableSearchQuery = '';
 
+        // Calendar State
+        let currentCalMonth = new Date();
+        let calActiveDateStr = '';
+
         // ------------------------------------------------------------------
         // INITIALIZATION
         // ------------------------------------------------------------------
@@ -406,6 +458,7 @@
                         map.Z = headers.indexOf('테스트회원') > -1 ? headers.indexOf('테스트회원') : 21;
                         map.M = headers.indexOf('매매금액') > -1 ? headers.indexOf('매매금액') : 8;
                         map.N = headers.indexOf('결제금액') > -1 ? headers.indexOf('결제금액') : 13;
+                        map.J = headers.indexOf('잔금일') > -1 ? headers.indexOf('잔금일') : 5;
                     } else {
                         map.C = headers.indexOf('중개업소명') > -1 ? headers.indexOf('중개업소명') : 2;
                         map.G = headers.indexOf('주택유형') > -1 ? headers.indexOf('주택유형') : 6;
@@ -417,6 +470,7 @@
                         map.Z = headers.indexOf('테스트회원') > -1 ? headers.indexOf('테스트회원') : 22; 
                         map.M = 12;
                         map.N = 17;
+                        map.J = headers.indexOf('잔금일') > -1 ? headers.indexOf('잔금일') : -1;
                     }
 
                     const extracted = [];
@@ -450,6 +504,7 @@
                             sVal: String(row[map.S] || '').trim(),
                             mRaw: String(row[map.M] || ''),
                             rRaw: String(row[map.N] || ''),
+                            jVal: map.J > -1 ? String(row[map.J] || '').trim() : '',
                             isManagementSheet: isManagementSheet
                         });
                     }
@@ -914,6 +969,7 @@
             tableData = dynamicData;
             tableCurrentPage = 1;
             renderTable();
+            renderCalendar();
         }
 
         // ------------------------------------------------------------------
@@ -1042,6 +1098,107 @@
             const btnNext = document.getElementById('btn-next');
             if (btnPrev) btnPrev.disabled = tableCurrentPage === 1;
             if (btnNext) btnNext.disabled = tableCurrentPage === maxPage;
+        }
+
+        // ------------------------------------------------------------------
+        // CALENDAR LOGIC
+        // ------------------------------------------------------------------
+        function renderCalendar() {
+            if (!rawBaseData || rawBaseData.length === 0) return;
+            const year = currentCalMonth.getFullYear();
+            const month = currentCalMonth.getMonth();
+            document.getElementById('cal-month-title').innerText = `${year}.${String(month+1).padStart(2,'0')}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const today = new Date();
+            const isThisMonth = year === today.getFullYear() && month === today.getMonth();
+            const todayDate = today.getDate();
+
+            const dateCounts = {};
+            rawBaseData.forEach(r => {
+                if (!r.isManagementSheet || !r.jVal) return;
+                const m = r.jVal.match(/(\d{4})[-./](\d{1,2})[-./](\d{1,2})/);
+                if (m) {
+                    const rowY = parseInt(m[1], 10);
+                    const rowM = parseInt(m[2], 10) - 1;
+                    const rowD = parseInt(m[3], 10);
+                    if (rowY === year && rowM === month) {
+                        dateCounts[rowD] = (dateCounts[rowD] || 0) + 1;
+                    }
+                }
+            });
+
+            let html = '';
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div class="rounded-lg bg-gray-50/30"></div>`;
+            }
+            for (let d = 1; d <= daysInMonth; d++) {
+                const isToday = (isThisMonth && d === todayDate);
+                const hasData = dateCounts[d] > 0;
+                let bgClass = isToday ? 'border-2 border-blue-400 bg-blue-50/20' : 'border border-transparent hover:bg-gray-50';
+                if (calActiveDateStr === `${year}-${month}-${d}`) bgClass += ' bg-blue-50 ring-1 ring-blue-300';
+                
+                let badge = hasData ? `<div class="absolute bottom-1 left-1/2 -translate-x-1/2 min-w-[16px] px-1 h-4 rounded-full bg-[#1A73E8] text-[9px] text-white flex items-center justify-center font-bold shadow-sm">${dateCounts[d]}</div>` : '';
+                
+                html += `
+                    <div onclick="selectCalDate(${year}, ${month}, ${d})" class="relative rounded-lg cursor-pointer flex flex-col items-center justify-start pt-1 pb-5 transition-colors ${bgClass}">
+                        <span class="font-medium ${isToday ? 'text-blue-600' : 'text-gray-700'}">${d}</span>
+                        ${badge}
+                    </div>
+                `;
+            }
+            document.getElementById('cal-grid').innerHTML = html;
+        }
+
+        function calPrev() { currentCalMonth.setMonth(currentCalMonth.getMonth() - 1); renderCalendar(); }
+        function calNext() { currentCalMonth.setMonth(currentCalMonth.getMonth() + 1); renderCalendar(); }
+
+        function selectCalDate(year, month, d) {
+            calActiveDateStr = `${year}-${month}-${d}`;
+            renderCalendar();
+
+            const details = rawBaseData.filter(r => {
+                if (!r.isManagementSheet || !r.jVal) return false;
+                const m = r.jVal.match(/(\d{4})[-./](\d{1,2})[-./](\d{1,2})/);
+                if (m) {
+                    if (parseInt(m[1], 10) === year && parseInt(m[2], 10) - 1 === month && parseInt(m[3], 10) === d) return true;
+                }
+                return false;
+            });
+
+            document.getElementById('cal-detail-title').innerHTML = `<i class="fa-solid fa-list text-blue-500"></i> <span class="text-blue-600">${month+1}월 ${d}일</span> 잔금 예정 <span class="text-gray-500 ml-1 text-sm font-medium">(${details.length}건)</span>`;
+
+            let tbody = '';
+            if (details.length === 0) {
+                tbody = `<tr><td colspan="3" class="py-10 text-gray-400 text-center">해당 날짜의 잔금 일정이 없습니다.</td></tr>`;
+            } else {
+                details.forEach(r => {
+                    let agencyName = r.cVal || '미상';
+                    let pBadge = '';
+                    if (globalPremiumBrokers && globalPremiumBrokers.has(agencyName)) {
+                        pBadge = `<span class="inline-flex items-center justify-center w-[15px] h-[15px] rounded-full bg-[#1A73E8] text-white text-[9px] font-bold shrink-0 ml-1 mt-[1px]">P</span>`;
+                    }
+                    
+                    const pNum = Number((r.mRaw || '').replace(/,/g, ''));
+                    let priceText = '-';
+                    if (!isNaN(pNum) && pNum > 0) {
+                        priceText = (pNum / 100000000).toFixed(1) + '억';
+                    }
+
+                    tbody += `
+                        <tr class="hover:bg-blue-50/30 transition-colors border-b border-gray-100 last:border-0">
+                            <td class="text-left py-3 font-semibold text-gray-800 pl-6 flex items-start">
+                                <span class="truncate max-w-[140px] sm:max-w-none">${agencyName}</span>${pBadge}
+                            </td>
+                            <td class="text-center py-3 font-medium text-gray-600">${r.hVal || '-'}</td>
+                            <td class="text-center py-3 font-bold text-blue-700">${priceText}</td>
+                        </tr>
+                    `;
+                });
+            }
+            document.getElementById('cal-detail-tbody').innerHTML = tbody;
         }
     </script>
 </body>
