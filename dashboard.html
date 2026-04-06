@@ -143,18 +143,22 @@
                         </div>
                     </div>
 
-                    <!-- NEW 3 CARDS (AVERAGES) -->
-                    <div class="grid grid-cols-3 gap-2 sm:gap-4 shrink-0">
-                        <div class="bg-[#1A73E8]/5 rounded-xl border border-[#1A73E8]/20 p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
-                            <dt class="text-[11px] sm:text-xs font-bold text-[#1A73E8]/80 mb-1 truncate">건별결제 평균 객단가</dt>
-                            <dd class="mt-auto text-lg sm:text-xl font-extrabold text-[#1A73E8]" id="stat-avg-unit">0만원</dd>
+                    <!-- NEW 4 CARDS (AVERAGES) -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 shrink-0">
+                        <div class="bg-[#1A73E8]/5 rounded-xl border border-[#1A73E8]/20 p-3 sm:p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
+                            <dt class="text-[11px] sm:text-xs font-bold text-[#1A73E8]/80 mb-1 truncate" title="건별결제 매매 평균 객단가">건별 매매 객단가</dt>
+                            <dd class="mt-auto text-lg sm:text-xl font-extrabold text-[#1A73E8]" id="stat-avg-unit-maemae">0만원</dd>
                         </div>
-                        <div class="bg-[#00897B]/5 rounded-xl border border-[#00897B]/20 p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
-                            <dt class="text-[11px] sm:text-xs font-bold text-[#00897B]/80 mb-1 truncate">매매 평균 거래금액</dt>
+                        <div class="bg-[#1A73E8]/5 rounded-xl border border-[#1A73E8]/20 p-3 sm:p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
+                            <dt class="text-[11px] sm:text-xs font-bold text-[#1A73E8]/80 mb-1 truncate" title="건별결제 임대차 평균 객단가">건별 임대 객단가</dt>
+                            <dd class="mt-auto text-lg sm:text-xl font-extrabold text-[#1A73E8]" id="stat-avg-unit-imdae">0만원</dd>
+                        </div>
+                        <div class="bg-[#00897B]/5 rounded-xl border border-[#00897B]/20 p-3 sm:p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
+                            <dt class="text-[11px] sm:text-xs font-bold text-[#00897B]/80 mb-1 truncate" title="매매 평균 거래금액">매매 평균 거래액</dt>
                             <dd class="mt-auto text-lg sm:text-xl font-extrabold text-[#00897B]" id="stat-avg-maemae">0.0억</dd>
                         </div>
-                        <div class="bg-[#3949AB]/5 rounded-xl border border-[#3949AB]/20 p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
-                            <dt class="text-[11px] sm:text-xs font-bold text-[#3949AB]/80 mb-1 truncate">전세 평균 보증금</dt>
+                        <div class="bg-[#3949AB]/5 rounded-xl border border-[#3949AB]/20 p-3 sm:p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
+                            <dt class="text-[11px] sm:text-xs font-bold text-[#3949AB]/80 mb-1 truncate" title="전세 평균 보증금">전세 평균 보증금</dt>
                             <dd class="mt-auto text-lg sm:text-xl font-extrabold text-[#3949AB]" id="stat-avg-jeonse">0.0억</dd>
                         </div>
                     </div>
@@ -660,7 +664,8 @@
             let sumImdae = 0;
             let sumFinalDone = 0;
 
-            let sumUnitPrices = 0; let countUnitPrices = 0;
+            let sumUnitPricesMaemae = 0; let countUnitPricesMaemae = 0;
+            let sumUnitPricesImdae = 0; let countUnitPricesImdae = 0;
             let sumMaemaeM = 0; let countMaemaeM = 0;
             let sumJeonseM = 0; let countJeonseM = 0;
 
@@ -701,8 +706,13 @@
                     const rNum = parseNum(row.rRaw);
 
                     if (sVal.includes('일반결제(단건)') && rNum !== null && rNum > 0) {
-                        sumUnitPrices += rNum;
-                        countUnitPrices++;
+                        if (hVal === '매매') {
+                            sumUnitPricesMaemae += rNum;
+                            countUnitPricesMaemae++;
+                        } else if (hVal === '전세' || hVal === '월세') {
+                            sumUnitPricesImdae += rNum;
+                            countUnitPricesImdae++;
+                        }
                     }
                     if (hVal === '매매' && mNum !== null && mNum > 0) {
                         sumMaemaeM += mNum;
@@ -767,7 +777,8 @@
             const issueRate = sumTotal > 0 ? ((sumFinalDone / sumTotal) * 100).toFixed(1) : '0.0';
             document.getElementById('stat-final').innerHTML = `${sumFinalDone} <span class="text-lg sm:text-xl text-gray-500 font-semibold tracking-normal align-baseline ml-1">(발급률 ${issueRate}%)</span>`;
 
-            document.getElementById('stat-avg-unit').innerText = countUnitPrices > 0 ? Math.round(sumUnitPrices / countUnitPrices / 10000).toLocaleString() + '만원' : '0만원';
+            document.getElementById('stat-avg-unit-maemae').innerText = countUnitPricesMaemae > 0 ? Math.round(sumUnitPricesMaemae / countUnitPricesMaemae / 10000).toLocaleString() + '만원' : '0만원';
+            document.getElementById('stat-avg-unit-imdae').innerText = countUnitPricesImdae > 0 ? Math.round(sumUnitPricesImdae / countUnitPricesImdae / 10000).toLocaleString() + '만원' : '0만원';
             document.getElementById('stat-avg-maemae').innerText = countMaemaeM > 0 ? (sumMaemaeM / countMaemaeM / 100000000).toFixed(1) + '억' : '0.0억';
             document.getElementById('stat-avg-jeonse').innerText = countJeonseM > 0 ? (sumJeonseM / countJeonseM / 100000000).toFixed(1) + '억' : '0.0억';
 
