@@ -133,14 +133,27 @@
                                 <div class="w-8 h-8 rounded-full bg-[#3949AB]/10 flex items-center justify-center text-[#3949AB]"><i class="fa-solid fa-house-chimney"></i></div>
                                 매매 건수
                             </dt>
-                            <dd class="mt-auto pt-2 text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight" id="stat-maemae">0</dd>
+                            <dd class="mt-auto pt-2 flex items-end justify-between gap-2">
+                                <span class="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight leading-none" id="stat-maemae">0</span>
+                                <ul class="text-[12px] text-gray-500 flex flex-col justify-end text-right font-medium leading-tight pb-0.5">
+                                    <li>&bull; 프리미엄: <span id="stat-maemae-prem">0</span>건</li>
+                                    <li>&bull; 건별: <span id="stat-maemae-single">0</span>건</li>
+                                </ul>
+                            </dd>
                         </div>
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col transition-shadow hover:shadow-md h-full">
                             <dt class="text-sm font-medium text-gray-500 flex items-center gap-2">
                                 <div class="w-8 h-8 rounded-full bg-[#00897B]/10 flex items-center justify-center text-[#00897B]"><i class="fa-solid fa-key"></i></div>
                                 임대차 건수
                             </dt>
-                            <dd class="mt-auto pt-2 text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight" id="stat-imdae">0</dd>
+                            <dd class="mt-auto pt-2 flex items-end justify-between gap-2">
+                                <span class="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight leading-none" id="stat-imdae">0</span>
+                                <ul class="text-[12px] text-gray-500 flex flex-col justify-end text-right font-medium leading-tight pb-0.5">
+                                    <li>&bull; 프리미엄: <span id="stat-imdae-prem">0</span>건</li>
+                                    <li>&bull; 건별: <span id="stat-imdae-single">0</span>건</li>
+                                    <li>&bull; 체험권: <span id="stat-imdae-trial">0</span>건</li>
+                                </ul>
+                            </dd>
                         </div>
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col transition-shadow hover:shadow-md h-full">
                             <dt class="text-sm font-medium text-gray-500 flex items-center gap-2 text-xs sm:text-sm">
@@ -151,25 +164,6 @@
                         </div>
                     </div>
 
-                    <!-- NEW 4 CARDS (COUNTS) -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 shrink-0">
-                        <div class="bg-gray-50 rounded-xl border border-gray-200 p-3 sm:p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
-                            <dt class="text-[11px] sm:text-xs font-bold text-gray-500 mb-1 truncate">프리미엄 매매</dt>
-                            <dd class="mt-auto text-base sm:text-lg font-extrabold text-gray-800" id="stat-cnt-prem-m">0</dd>
-                        </div>
-                        <div class="bg-gray-50 rounded-xl border border-gray-200 p-3 sm:p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
-                            <dt class="text-[11px] sm:text-xs font-bold text-gray-500 mb-1 truncate">프리미엄 임대차</dt>
-                            <dd class="mt-auto text-base sm:text-lg font-extrabold text-gray-800" id="stat-cnt-prem-i">0</dd>
-                        </div>
-                        <div class="bg-gray-50 rounded-xl border border-gray-200 p-3 sm:p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
-                            <dt class="text-[11px] sm:text-xs font-bold text-gray-500 mb-1 truncate">단건결제</dt>
-                            <dd class="mt-auto text-base sm:text-lg font-extrabold text-gray-800" id="stat-cnt-single">0건 <span class="text-[10px] sm:text-[11px] font-normal text-gray-500 block mt-0.5">(매매 0 / 임대차 0)</span></dd>
-                        </div>
-                        <div class="bg-gray-50 rounded-xl border border-gray-200 p-3 sm:p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
-                            <dt class="text-[11px] sm:text-xs font-bold text-gray-500 mb-1 truncate">체험권</dt>
-                            <dd class="mt-auto text-base sm:text-lg font-extrabold text-gray-800" id="stat-cnt-trial">0건 <span class="text-[10px] sm:text-[11px] font-normal text-gray-500 block mt-0.5">(매매 0 / 임대차 0)</span></dd>
-                        </div>
-                    </div>
 
                     <!-- NEW 4 CARDS (AVERAGES) -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 shrink-0">
@@ -821,10 +815,11 @@
             const issueRate = sumTotal > 0 ? ((sumFinalDone / sumTotal) * 100).toFixed(1) : '0.0';
             document.getElementById('stat-final').innerHTML = `${sumFinalDone} <span class="text-lg sm:text-xl text-gray-500 font-semibold tracking-normal align-baseline ml-1">(발급률 ${issueRate}%)</span>`;
 
-            document.getElementById('stat-cnt-prem-m').innerText = rightTbl.premium.m;
-            document.getElementById('stat-cnt-prem-i').innerText = rightTbl.premium.i;
-            document.getElementById('stat-cnt-single').innerHTML = `${rightTbl.single.m + rightTbl.single.i}건 <span class="text-[10px] sm:text-[11px] font-normal text-gray-500 block mt-0.5">(매매 ${rightTbl.single.m} / 임대차 ${rightTbl.single.i})</span>`;
-            document.getElementById('stat-cnt-trial').innerHTML = `${rightTbl.trial.m + rightTbl.trial.i}건 <span class="text-[10px] sm:text-[11px] font-normal text-gray-500 block mt-0.5">(매매 ${rightTbl.trial.m} / 임대차 ${rightTbl.trial.i})</span>`;
+            document.getElementById('stat-maemae-prem').innerText = rightTbl.premium.m;
+            document.getElementById('stat-maemae-single').innerText = rightTbl.single.m;
+            document.getElementById('stat-imdae-prem').innerText = rightTbl.premium.i;
+            document.getElementById('stat-imdae-single').innerText = rightTbl.single.i;
+            document.getElementById('stat-imdae-trial').innerText = rightTbl.trial.i;
 
             document.getElementById('stat-avg-unit-maemae').innerText = countUnitPricesMaemae > 0 ? Math.round(sumUnitPricesMaemae / countUnitPricesMaemae / 10000).toLocaleString() + '만원' : '0만원';
             document.getElementById('stat-avg-unit-imdae').innerText = countUnitPricesImdae > 0 ? Math.round(sumUnitPricesImdae / countUnitPricesImdae / 10000).toLocaleString() + '만원' : '0만원';
