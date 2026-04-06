@@ -143,6 +143,26 @@
                         </div>
                     </div>
 
+                    <!-- NEW 4 CARDS (COUNTS) -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 shrink-0">
+                        <div class="bg-blue-50/50 rounded-xl border border-blue-100/50 p-3 sm:p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
+                            <dt class="text-[11px] sm:text-xs font-bold text-blue-800/70 mb-1 truncate">프리미엄 매매</dt>
+                            <dd class="mt-auto text-lg sm:text-xl font-extrabold text-blue-700" id="stat-cnt-prem-m">0</dd>
+                        </div>
+                        <div class="bg-blue-50/50 rounded-xl border border-blue-100/50 p-3 sm:p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
+                            <dt class="text-[11px] sm:text-xs font-bold text-blue-800/70 mb-1 truncate">프리미엄 임대차</dt>
+                            <dd class="mt-auto text-lg sm:text-xl font-extrabold text-blue-700" id="stat-cnt-prem-i">0</dd>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl border border-gray-200 p-3 sm:p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
+                            <dt class="text-[11px] sm:text-xs font-bold text-gray-500 mb-1 truncate">단건결제</dt>
+                            <dd class="mt-auto text-base sm:text-lg font-extrabold text-gray-800" id="stat-cnt-single">0건 <span class="text-[10px] sm:text-[11px] font-normal text-gray-500 block mt-0.5">(매매 0 / 임대차 0)</span></dd>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl border border-gray-200 p-3 sm:p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
+                            <dt class="text-[11px] sm:text-xs font-bold text-gray-500 mb-1 truncate">체험권</dt>
+                            <dd class="mt-auto text-base sm:text-lg font-extrabold text-gray-800" id="stat-cnt-trial">0건 <span class="text-[10px] sm:text-[11px] font-normal text-gray-500 block mt-0.5">(매매 0 / 임대차 0)</span></dd>
+                        </div>
+                    </div>
+
                     <!-- NEW 4 CARDS (AVERAGES) -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 shrink-0">
                         <div class="bg-[#1A73E8]/5 rounded-xl border border-[#1A73E8]/20 p-3 sm:p-4 flex flex-col transition-shadow hover:shadow-sm text-center">
@@ -294,14 +314,16 @@
                         <table class="clean-table align-middle text-sm">
                             <thead class="sticky top-0 bg-gray-50 z-10 shadow-sm border-b-2">
                                 <tr>
-                                    <th class="w-16 text-center">순위</th>
+                                    <th class="w-12 text-center">순위</th>
                                     <th class="text-left font-bold text-gray-800">사무소명</th>
-                                    <th class="w-20 text-center">건수</th>
+                                    <th class="w-12 text-center text-gray-900">합계</th>
+                                    <th class="w-12 text-center text-blue-600">매매</th>
+                                    <th class="w-12 text-center text-green-600">임대차</th>
                                 </tr>
                             </thead>
                             <tbody id="broker-tbody">
                                 <!-- JS Injection -->
-                                <tr><td colspan="3" class="py-10 text-gray-400">데이터가 없습니다.</td></tr>
+                                <tr><td colspan="5" class="py-10 text-gray-400 text-center">데이터가 없습니다.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -736,7 +758,11 @@
                     if (isI) rightTbl.premium.i++;
                 }
 
-                brokerMap[cVal] = (brokerMap[cVal] || 0) + 1;
+                if (!brokerMap[cVal]) brokerMap[cVal] = { total: 0, m: 0, i: 0 };
+                brokerMap[cVal].total++;
+                if (isM) brokerMap[cVal].m++;
+                if (isI) brokerMap[cVal].i++;
+
                 housingMap[gVal] = (housingMap[gVal] || 0) + 1;
                 
                 let addrParts = iVal.split(/\s+/);
@@ -777,6 +803,11 @@
             const issueRate = sumTotal > 0 ? ((sumFinalDone / sumTotal) * 100).toFixed(1) : '0.0';
             document.getElementById('stat-final').innerHTML = `${sumFinalDone} <span class="text-lg sm:text-xl text-gray-500 font-semibold tracking-normal align-baseline ml-1">(발급률 ${issueRate}%)</span>`;
 
+            document.getElementById('stat-cnt-prem-m').innerText = rightTbl.premium.m;
+            document.getElementById('stat-cnt-prem-i').innerText = rightTbl.premium.i;
+            document.getElementById('stat-cnt-single').innerHTML = `${rightTbl.single.m + rightTbl.single.i}건 <span class="text-[10px] sm:text-[11px] font-normal text-gray-500 block mt-0.5">(매매 ${rightTbl.single.m} / 임대차 ${rightTbl.single.i})</span>`;
+            document.getElementById('stat-cnt-trial').innerHTML = `${rightTbl.trial.m + rightTbl.trial.i}건 <span class="text-[10px] sm:text-[11px] font-normal text-gray-500 block mt-0.5">(매매 ${rightTbl.trial.m} / 임대차 ${rightTbl.trial.i})</span>`;
+
             document.getElementById('stat-avg-unit-maemae').innerText = countUnitPricesMaemae > 0 ? Math.round(sumUnitPricesMaemae / countUnitPricesMaemae / 10000).toLocaleString() + '만원' : '0만원';
             document.getElementById('stat-avg-unit-imdae').innerText = countUnitPricesImdae > 0 ? Math.round(sumUnitPricesImdae / countUnitPricesImdae / 10000).toLocaleString() + '만원' : '0만원';
             document.getElementById('stat-avg-maemae').innerText = countMaemaeM > 0 ? (sumMaemaeM / countMaemaeM / 100000000).toFixed(1) + '억' : '0.0억';
@@ -802,13 +833,17 @@
 
 
             // ======= GENERATE AND RENDER MIDDLE COLUMNS =======
-            const topN = (mapObj, n=10) => Object.entries(mapObj).sort((a,b) => b[1] - a[1]).slice(0, n);
+            const topN = (mapObj, n=10) => Object.entries(mapObj).sort((a,b) => {
+                let valA = typeof a[1] === 'object' ? a[1].total : a[1];
+                let valB = typeof b[1] === 'object' ? b[1].total : b[1];
+                return valB - valA;
+            }).slice(0, n);
 
             // 1. Right: Broker HTML Table 
             const brokerRanks = topN(brokerMap, 10);
             let bHTML = '';
             if (brokerRanks.length === 0) {
-                bHTML = `<tr><td colspan="3" class="py-10 text-gray-400">데이터가 없습니다.</td></tr>`;
+                bHTML = `<tr><td colspan="5" class="py-10 text-gray-400 text-center">데이터가 없습니다.</td></tr>`;
             } else {
                 globalPremiumBrokers = new Set();
                 rawBaseData.forEach(row => {
@@ -822,6 +857,7 @@
                 brokerRanks.forEach((arr, idx) => {
                     let rNumClass = idx < 3 ? 'text-blue-600 font-extrabold' : 'text-gray-500 font-medium';
                     let agencyName = arr[0];
+                    let info = arr[1]; // {total, m, i}
                     let pBadge = '';
                     if (agencyName && agencyName !== '미상' && agencyName !== '-') {
                         pBadge = globalPremiumBrokers.has(agencyName) 
@@ -830,14 +866,16 @@
                     }
                     bHTML += `
                         <tr>
-                            <td class="${rNumClass}">${idx+1}</td>
+                            <td class="${rNumClass} text-center">${idx+1}</td>
                             <td class="text-left font-semibold text-gray-800">
                                 <div class="flex items-center gap-1">
                                     <span class="truncate">${agencyName}</span>
                                     ${pBadge}
                                 </div>
                             </td>
-                            <td class="text-blue-700 font-bold">${arr[1]}</td>
+                            <td class="text-gray-900 font-bold text-center">${info.total}</td>
+                            <td class="text-blue-600 font-medium text-center">${info.m}</td>
+                            <td class="text-green-600 font-medium text-center">${info.i}</td>
                         </tr>
                     `;
                 });
