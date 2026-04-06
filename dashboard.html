@@ -281,8 +281,8 @@
                 </div>
             </div>
 
-            <!-- 2. MIDDLE SECTION (3 columns, 33/33/33) -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- 2. MIDDLE SECTION (4 columns, 25/25/50) -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <!-- Left: Donut Chart (주택유형) -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col h-[350px]">
                     <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2 mb-4 shrink-0">
@@ -304,21 +304,21 @@
                 </div>
 
                 <!-- Right: Table (중개사무소 TOP 10) -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[350px] overflow-hidden">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[350px] overflow-hidden lg:col-span-2">
                     <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0">
                         <h3 class="font-bold text-gray-800 flex items-center gap-2">
                             <i class="fa-solid fa-users text-blue-500"></i> 중개사무소 TOP 10
                         </h3>
                     </div>
                     <div class="overflow-y-auto flex-1 p-0">
-                        <table class="clean-table align-middle text-sm">
+                        <table class="clean-table align-middle text-xs sm:text-sm">
                             <thead class="sticky top-0 bg-gray-50 z-10 shadow-sm border-b-2">
                                 <tr>
-                                    <th class="w-12 text-center">순위</th>
-                                    <th class="text-left font-bold text-gray-800">사무소명</th>
-                                    <th class="w-12 text-center text-gray-900">합계</th>
-                                    <th class="w-12 text-center text-blue-600">매매</th>
-                                    <th class="w-12 text-center text-green-600">임대차</th>
+                                    <th class="w-10 sm:w-12 text-center px-1 sm:px-2">순위</th>
+                                    <th class="text-left font-bold text-gray-800 px-2 sm:px-4">사무소명</th>
+                                    <th class="w-12 sm:w-16 text-center text-gray-900 px-1 sm:px-2">합계</th>
+                                    <th class="w-12 sm:w-16 text-center text-blue-600 px-1 sm:px-2">매매</th>
+                                    <th class="w-12 sm:w-16 text-center text-green-600 px-1 sm:px-2">임대차</th>
                                 </tr>
                             </thead>
                             <tbody id="broker-tbody">
@@ -865,17 +865,17 @@
                             : `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#34A853] text-white text-[10px] font-bold shrink-0">N</span>`;
                     }
                     bHTML += `
-                        <tr>
-                            <td class="${rNumClass} text-center">${idx+1}</td>
-                            <td class="text-left font-semibold text-gray-800">
+                        <tr class="text-xs sm:text-sm">
+                            <td class="${rNumClass} text-center px-1 sm:px-2">${idx+1}</td>
+                            <td class="text-left font-semibold text-gray-800 px-2 sm:px-4">
                                 <div class="flex items-center gap-1">
                                     <span class="truncate">${agencyName}</span>
                                     ${pBadge}
                                 </div>
                             </td>
-                            <td class="text-gray-900 font-bold text-center">${info.total}</td>
-                            <td class="text-blue-600 font-medium text-center">${info.m}</td>
-                            <td class="text-green-600 font-medium text-center">${info.i}</td>
+                            <td class="text-gray-900 font-bold text-center px-1 sm:px-2">${info.total}</td>
+                            <td class="text-blue-600 font-medium text-center px-1 sm:px-2">${info.m}</td>
+                            <td class="text-green-600 font-medium text-center px-1 sm:px-2">${info.i}</td>
                         </tr>
                     `;
                 });
