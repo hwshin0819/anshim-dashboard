@@ -115,6 +115,26 @@ async function uploadToGoogleSheets() {
   try {
     await processFileAndUpload(REQUEST_FILE_PATH, '신청관리');
     await processFileAndUpload(MANAGEMENT_FILE_PATH, '관리리스트');
+    
+    const now = new Date();
+    // Offset KST correctly via UTC addition
+    const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+    const yyyy = kstTime.getUTCFullYear();
+    const mm = String(kstTime.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(kstTime.getUTCDate()).padStart(2, '0');
+    const hh = String(kstTime.getUTCHours()).padStart(2, '0');
+    const min = String(kstTime.getUTCMinutes()).padStart(2, '0');
+    const metaTimestamp = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+
+    console.log(`Writing metadata timestamp: ${metaTimestamp}`);
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `'메타데이터'!A1`,
+      valueInputOption: 'USER_ENTERED',
+      resource: {
+        values: [[metaTimestamp]]
+      }
+    });
   } catch (error) {
     console.error('An error occurred during Google Sheets upload:\n', error);
     throw error;

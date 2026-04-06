@@ -87,7 +87,6 @@
                     </div>
                     
                     <div class="flex items-center gap-3">
-                        <span id="last-updated-text" class="text-xs text-gray-500 font-medium hidden sm:block tracking-wide"></span>
                         <button onclick="loadData()" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm shrink-0">
                             <i class="fa-solid fa-rotate-right"></i>
                         </button>
@@ -95,6 +94,12 @@
                 </div>
 
             </div>
+        </div>
+        <div id="last-updated-bar" class="border-t border-gray-100 bg-gray-50/70 text-center py-1.5">
+            <span id="last-updated-text" class="text-xs text-gray-400 tracking-wide">
+                <i class="fa-solid fa-clock-rotate-left mr-1 text-gray-300"></i>
+                데이터 로딩 중...
+            </span>
         </div>
     </nav>
 
@@ -456,7 +461,7 @@
                 const [resM, resR, resD] = await Promise.all([
                     fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent('관리리스트')}?key=${API_KEY}`),
                     fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent('신청관리')}?key=${API_KEY}`),
-                    fetch(`https://www.googleapis.com/drive/v3/files/${SPREADSHEET_ID}?fields=modifiedTime&key=${API_KEY}`).catch(e => null)
+                    fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent('메타데이터')}?key=${API_KEY}`).catch(e => null)
                 ]);
 
                 if (!resM.ok) throw new Error(`관리리스트 HTTP ${resM.status}`);
@@ -468,15 +473,8 @@
                 if (resD && resD.ok) {
                     try {
                         const jsonD = await resD.json();
-                        if (jsonD.modifiedTime) {
-                            const modDate = new Date(jsonD.modifiedTime);
-                            const kstTime = new Date(modDate.getTime() + (9 * 60 * 60 * 1000));
-                            const yyyy = kstTime.getUTCFullYear();
-                            const mm = String(kstTime.getUTCMonth() + 1).padStart(2, '0');
-                            const dd = String(kstTime.getUTCDate()).padStart(2, '0');
-                            const hh = String(kstTime.getUTCHours()).padStart(2, '0');
-                            const min = String(kstTime.getUTCMinutes()).padStart(2, '0');
-                            document.getElementById('last-updated-text').innerText = `마지막 업데이트: ${yyyy}-${mm}-${dd} ${hh}:${min}`;
+                        if (jsonD.values && jsonD.values.length > 0 && jsonD.values[0].length > 0) {
+                            document.getElementById('last-updated-text').innerHTML = `<i class="fa-solid fa-clock-rotate-left mr-1 text-gray-300"></i>마지막 업데이트: ${jsonD.values[0][0]}`;
                         }
                     } catch(e) { console.error('마지막 업데이트 파싱 에러', e); }
                 }
