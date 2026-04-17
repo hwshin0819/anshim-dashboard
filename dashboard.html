@@ -386,32 +386,39 @@
                             </table>
                         </div>
 
-                        <!-- RIGHT NARROW: 4 Metric Cards -->
-                        <div class="w-full lg:w-[280px] shrink-0 bg-gray-50 p-4 flex flex-col gap-3 overflow-y-auto border-t lg:border-t-0">
-                            <!-- Metric 1: 정상 -->
-                            <div class="bg-[#e8f5e9] rounded-xl border border-[#e8f5e9] p-4 flex flex-col transition-shadow hover:shadow-sm">
-                                <h4 class="text-xs font-bold text-[#1b5e20]/80 mb-1">정상 활용 중</h4>
-                                <div class="flex justify-between items-end mt-auto">
-                                    <span class="text-3xl font-extrabold text-[#1b5e20] leading-none" id="p-stat-normal">0</span>
-                                    <span class="text-xs font-medium text-[#1b5e20]/60">2개월 내 사용</span>
+                        <!-- RIGHT NARROW: 4 Metric Cards Grid -->
+                        <div class="w-full lg:w-[320px] shrink-0 bg-gray-50 p-4 flex flex-col items-center justify-start border-t lg:border-t-0">
+                            <div class="grid grid-cols-2 gap-[10px] w-full">
+                                <!-- Top-left: 활성 중개사무소 수 -->
+                                <div class="bg-[rgb(232,240,254)] rounded-[8px] p-4 flex flex-col">
+                                    <h4 class="text-[12px] font-bold text-[rgb(25,103,210)] mb-1 leading-tight">활성 중개사무소 수</h4>
+                                    <div class="flex items-end mt-auto">
+                                        <span class="text-[22px] font-medium text-[rgb(25,103,210)] leading-none" id="p-stat-active">0</span>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <!-- Metric 2: 주의 -->
-                            <div class="bg-[#fff3e0] rounded-xl border border-[#fff3e0] p-4 flex flex-col transition-shadow hover:shadow-sm">
-                                <h4 class="text-xs font-bold text-[#e65100]/80 mb-1">주의 <span class="font-medium text-[10px]">(2개월 미사용)</span></h4>
-                                <div class="flex justify-between items-end mt-auto">
-                                    <span class="text-3xl font-extrabold text-[#e65100] leading-none" id="p-stat-warn">0</span>
+                                
+                                <!-- Top-right: 정상 활용 중 -->
+                                <div class="bg-[rgb(232,245,233)] rounded-[8px] p-4 flex flex-col">
+                                    <h4 class="text-[12px] font-bold text-[rgb(27,94,32)] mb-1 leading-tight">정상 활용 중</h4>
+                                    <div class="flex items-end mt-auto">
+                                        <span class="text-[22px] font-medium text-[rgb(27,94,32)] leading-none" id="p-stat-normal">0</span>
+                                    </div>
                                 </div>
-                            </div>
-                            
+                                
+                                <!-- Bottom-left: 주의 -->
+                                <div class="bg-[rgb(255,243,224)] rounded-[8px] p-4 flex flex-col">
+                                    <h4 class="text-[12px] font-bold text-[rgb(230,81,0)] mb-1 leading-tight">주의 <span class="block text-[10px] font-medium mt-0.5">(2개월 미사용)</span></h4>
+                                    <div class="flex items-end mt-auto">
+                                        <span class="text-[22px] font-medium text-[rgb(230,81,0)] leading-none" id="p-stat-warn">0</span>
+                                    </div>
+                                </div>
 
-                            <!-- Metric 4: 계약종료 -->
-                            <div class="bg-[#f5f5f5] rounded-xl border border-[#f5f5f5] p-4 flex flex-col transition-shadow hover:shadow-sm">
-                                <h4 class="text-xs font-bold text-[#616161]/80 mb-1">계약종료</h4>
-                                <div class="flex justify-between items-end mt-auto">
-                                    <span class="text-3xl font-extrabold text-[#616161] leading-none" id="p-stat-expired">0</span>
-                                    <span class="text-xs font-medium text-[#616161]/60">미갱신</span>
+                                <!-- Bottom-right: 계약종료 -->
+                                <div class="bg-[rgb(255,235,238)] rounded-[8px] p-4 flex flex-col">
+                                    <h4 class="text-[12px] font-bold text-[rgb(183,28,28)] mb-1 leading-tight">계약종료</h4>
+                                    <div class="flex items-end mt-auto">
+                                        <span class="text-[22px] font-medium text-[rgb(183,28,28)] leading-none" id="p-stat-expired">0</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -493,6 +500,7 @@
         let tableData = [];
         let premiumBrokersSheetData = [];
         let globalPremiumBrokers = new Set();
+        let globalSingleBrokers = new Set();
         let tableCurrentPage = 1;
         const TABLE_ROWS_PER_PAGE = 20;
         let tableSortCol = 'qVal';
@@ -655,6 +663,17 @@
                 const rowsM = parseSheet(jsonM, true);
                 const rowsR = parseSheet(jsonR, false);
                 rawBaseData = [...rowsM, ...rowsR];
+
+                globalSingleBrokers.clear();
+                rawBaseData.forEach(r => {
+                    const cb = r.cVal || '';
+                    const sb = r.sVal || '';
+                    if (cb && cb !== '미상' && cb !== '-') {
+                        if (sb.includes('단건') || sb.includes('건별')) {
+                            globalSingleBrokers.add(cb);
+                        }
+                    }
+                });
 
                 // Build Year Dropdown UI 
                 if (yearSet.size > 0) {
@@ -1310,6 +1329,8 @@
                             } else {
                                 pBadge = `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#1A73E8] text-white text-[10px] font-bold shrink-0 ml-1 mt-[1px]">P</span>`;
                             }
+                        } else if (globalSingleBrokers.has(row.cVal)) {
+                            pBadge = `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[rgb(56,142,60)] text-white text-[10px] font-bold shrink-0 ml-1 mt-[1px]">N</span>`;
                         }
                     }
 
@@ -1550,6 +1571,8 @@
             document.getElementById('p-stat-expired').innerText = pExpired;
             
             let pActive = pNormal + pWarn + pUrgent;
+            const psa = document.getElementById('p-stat-active');
+            if (psa) psa.innerText = pActive;
             document.getElementById('premium-count').innerText = `(활성 ${pActive}개)`;
 
             // Sort & Render Section 1
