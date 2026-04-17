@@ -35,78 +35,79 @@
 </head>
 
 <body class="text-gray-800 antialiased h-screen flex flex-col overflow-hidden">
-
     <!-- Top Header Navigation -->
-    <nav class="bg-white shadow-sm border-b border-gray-200 z-10 shrink-0">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row justify-between items-center py-3 gap-4">
-                
-                <!-- Title & Tabs -->
-                <div class="flex flex-col sm:flex-row items-center gap-6">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center text-white shadow-sm"><i class="fa-solid fa-chart-pie"></i></div>
-                        <span class="font-bold text-xl tracking-tight text-gray-900">안심케어 대시보드</span>
+    <nav class="bg-white z-10 shrink-0 shadow-sm border-b border-gray-200">
+        <!-- ROW 1 — Top bar -->
+        <div class="border-b border-gray-100 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <!-- Left: logo icon + "안심케어 대시보드" title -->
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm">
+                        <i class="fa-solid fa-chart-pie text-lg"></i>
                     </div>
-                    
-                    <div class="flex items-center gap-4 border-b border-gray-200 self-end sm:self-auto w-full sm:w-auto">
-                        <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="px-2 py-2 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 transition-colors shrink-0">대시보드</button>
-                        <button onclick="switchTab('premium')" id="tab-btn-premium" class="px-2 py-2 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors shrink-0">프리미엄 중개사무소</button>
-                    </div>
+                    <h1 class="font-bold text-2xl tracking-tight text-gray-900">안심케어 대시보드</h1>
                 </div>
-
-                <!-- Date Filters & Actions -->
-                <div class="flex items-center justify-between w-full sm:w-auto gap-4">
-                    <div class="flex flex-wrap bg-gray-100 p-1 rounded-lg items-center gap-1">
-                        <button onclick="setDateFilter('이번달')" id="btn-이번달" class="filter-btn px-4 py-1.5 text-sm font-medium rounded-md transition-all text-gray-600 hover:bg-gray-200">이번달</button>
-                        <button onclick="setDateFilter('전체')" id="btn-전체" class="filter-btn px-4 py-1.5 text-sm font-medium rounded-md transition-all active-btn bg-white text-blue-600 shadow-sm">전체</button>
-                        
-                        <div class="w-px h-5 bg-gray-300 mx-1"></div>
-                        
-                        <select id="sel-year" onchange="setDateFilter('custom', this.value, document.getElementById('sel-month').value)" class="text-sm border-gray-300 rounded-md py-1 pl-2 pr-6 focus:ring-blue-500 focus:border-blue-500 bg-transparent text-gray-700 font-medium cursor-pointer appearance-none transition-all">
-                            <option value="">년도 선택</option>
-                        </select>
-                        <select id="sel-month" onchange="setDateFilter('custom', document.getElementById('sel-year').value, this.value)" class="text-sm border-gray-300 rounded-md py-1 pl-2 pr-6 focus:ring-blue-500 focus:border-blue-500 bg-transparent text-gray-700 font-medium cursor-pointer appearance-none ml-1 transition-all">
-                            <option value="">월 선택</option>
-                            <option value="01">1월</option>
-                            <option value="02">2월</option>
-                            <option value="03">3월</option>
-                            <option value="04">4월</option>
-                            <option value="05">5월</option>
-                            <option value="06">6월</option>
-                            <option value="07">7월</option>
-                            <option value="08">8월</option>
-                            <option value="09">9월</option>
-                            <option value="10">10월</option>
-                            <option value="11">11월</option>
-                            <option value="12">12월</option>
-                        </select>
-                        
-                        <div class="w-px h-5 bg-gray-300 mx-1"></div>
-                        
-                        <div class="flex items-center gap-1">
-                            <span class="text-sm text-gray-600 font-medium ml-1">시작일</span>
-                            <input type="date" id="input-start-date" class="text-sm border-gray-300 rounded-md py-1 px-2 focus:ring-blue-500 focus:border-blue-500 bg-transparent text-gray-700 font-medium transition-all" />
-                            <span class="text-sm text-gray-600 font-medium mx-1">~</span>
-                            <span class="text-sm text-gray-600 font-medium">종료일</span>
-                            <input type="date" id="input-end-date" class="text-sm border-gray-300 rounded-md py-1 px-2 focus:ring-blue-500 focus:border-blue-500 bg-transparent text-gray-700 font-medium transition-all" />
-                            <button onclick="setDateFilter('range')" class="filter-btn px-4 py-1.5 text-sm font-medium rounded-md transition-all text-blue-600 bg-blue-50 hover:bg-blue-100 shadow-sm ml-1 select-none">조회</button>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center gap-3">
-                        <button onclick="loadData()" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm shrink-0">
-                            <i class="fa-solid fa-rotate-right"></i>
-                        </button>
-                    </div>
+                <!-- Right: refresh button and last updated time -->
+                <div class="flex items-center gap-4">
+                    <span id="last-updated-text" class="text-xs text-gray-500 font-medium tracking-wide">
+                        <i class="fa-solid fa-clock-rotate-left mr-1 text-gray-400"></i>
+                        데이터 로딩 중...
+                    </span>
+                    <button onclick="loadData()" class="bg-gray-50 hover:bg-gray-100 text-gray-600 px-3 py-1.5 rounded-md text-sm font-medium transition-colors border border-gray-200 shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
                 </div>
-
             </div>
         </div>
-        <div id="last-updated-bar" class="border-t border-gray-100 bg-gray-50/70 text-center py-1.5">
-            <span id="last-updated-text" class="text-xs text-gray-400 tracking-wide">
-                <i class="fa-solid fa-clock-rotate-left mr-1 text-gray-300"></i>
-                데이터 로딩 중...
-            </span>
+
+        <!-- ROW 2 — Tab navigation -->
+        <div class="bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-6">
+                <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="py-3.5 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 transition-colors">대시보드</button>
+                <button onclick="switchTab('premium')" id="tab-btn-premium" class="py-3.5 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-900 transition-colors">프리미엄 중개사무소</button>
+            </div>
+        </div>
+
+        <!-- ROW 3 — Filter bar (only visible on 대시보드 tab) -->
+        <div id="filter-bar-container" class="bg-[#f8f9fa] border-t border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-start overflow-x-auto custom-scrollbar">
+                <div class="flex items-center gap-2">
+                    <button onclick="setDateFilter('이번달')" id="btn-이번달" class="filter-btn px-4 py-1.5 text-sm font-medium rounded-md transition-all text-gray-600 hover:bg-gray-200">이번달</button>
+                    <button onclick="setDateFilter('전체')" id="btn-전체" class="filter-btn px-4 py-1.5 text-sm font-medium rounded-md bg-white border border-gray-200 text-blue-600 shadow-sm transition-all active-btn">전체</button>
+                    
+                    <div class="w-px h-5 bg-gray-300 mx-2"></div>
+                    
+                    <select id="sel-year" onchange="setDateFilter('custom', this.value, document.getElementById('sel-month').value)" class="text-sm border border-gray-200 rounded-md py-1.5 pl-3 pr-8 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700 font-medium cursor-pointer transition-colors shadow-sm appearance-none" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 0.7rem top 50%; background-size: 0.65rem auto;">
+                        <option value="">년도 선택</option>
+                    </select>
+                    <select id="sel-month" onchange="setDateFilter('custom', document.getElementById('sel-year').value, this.value)" class="text-sm border border-gray-200 rounded-md py-1.5 pl-3 pr-8 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700 font-medium cursor-pointer ml-1 transition-colors shadow-sm appearance-none" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 0.7rem top 50%; background-size: 0.65rem auto;">
+                        <option value="">월 선택</option>
+                        <option value="01">1월</option>
+                        <option value="02">2월</option>
+                        <option value="03">3월</option>
+                        <option value="04">4월</option>
+                        <option value="05">5월</option>
+                        <option value="06">6월</option>
+                        <option value="07">7월</option>
+                        <option value="08">8월</option>
+                        <option value="09">9월</option>
+                        <option value="10">10월</option>
+                        <option value="11">11월</option>
+                        <option value="12">12월</option>
+                    </select>
+                    
+                    <div class="w-px h-5 bg-gray-300 mx-2"></div>
+                    
+                    <div class="flex items-center bg-white border border-gray-200 rounded-md shadow-sm p-1">
+                        <span class="text-sm text-gray-600 font-medium px-2">시작일</span>
+                        <input type="date" id="input-start-date" class="text-sm border-0 rounded py-1 px-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-transparent text-gray-700 transition-all" />
+                        <span class="text-sm text-gray-400 font-medium mx-1">~</span>
+                        <span class="text-sm text-gray-600 font-medium px-2">종료일</span>
+                        <input type="date" id="input-end-date" class="text-sm border-0 rounded py-1 px-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-transparent text-gray-700 transition-all" />
+                    </div>
+                    <button onclick="setDateFilter('range')" class="px-5 py-1.5 text-sm font-semibold rounded-md transition-all text-white bg-blue-600 hover:bg-blue-700 shadow-sm ml-1 select-none">조회</button>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -1220,6 +1221,7 @@
         function switchTab(tabId) {
             const vd = document.getElementById('view-dashboard');
             const vp = document.getElementById('view-premium');
+            const fb = document.getElementById('filter-bar-container');
             const bd = document.getElementById('tab-btn-dashboard');
             const bp = document.getElementById('tab-btn-premium');
             
@@ -1229,6 +1231,7 @@
             if (tabId === 'dashboard') {
                 vd.classList.remove('hidden');
                 vp.classList.add('hidden');
+                if (fb) fb.classList.remove('hidden');
                 activeClass.forEach(c => bd.classList.add(c));
                 inactiveClass.forEach(c => bd.classList.remove(c));
                 inactiveClass.forEach(c => bp.classList.add(c));
@@ -1236,6 +1239,7 @@
             } else {
                 vd.classList.add('hidden');
                 vp.classList.remove('hidden');
+                if (fb) fb.classList.add('hidden');
                 activeClass.forEach(c => bp.classList.add(c));
                 inactiveClass.forEach(c => bp.classList.remove(c));
                 inactiveClass.forEach(c => bd.classList.add(c));
