@@ -406,7 +406,7 @@
                                 
                                 <!-- Bottom-left: 주의 -->
                                 <div class="bg-[rgb(255,243,224)] rounded-[8px] p-4 flex flex-col">
-                                    <h4 class="text-[12px] font-bold text-[rgb(230,81,0)] mb-1 leading-tight">주의 <span class="block text-[10px] font-medium mt-0.5">(1개월 이상 미사용)</span></h4>
+                                    <h4 class="text-[12px] font-bold text-[rgb(230,81,0)] mb-1 leading-tight">주의 <span class="inline text-[10px] font-medium ml-1">(1개월 이상 미사용)</span></h4>
                                     <div class="flex items-end mt-auto">
                                         <span class="text-[22px] font-medium text-[rgb(230,81,0)] leading-none" id="p-stat-warn">0</span>
                                     </div>
@@ -426,10 +426,13 @@
 
                 <!-- Bottom Panel: Single Payment Brokers -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden w-full min-h-[400px]">
-                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                            <i class="fa-solid fa-file-invoice-dollar text-blue-500"></i> 건별 신청 중개사무소
-                        </h3>
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto overflow-x-auto pb-1 sm:pb-0">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-4 w-full">
+                            <h3 class="font-bold text-gray-800 flex items-center gap-2 whitespace-nowrap">
+                                <i class="fa-solid fa-file-invoice-dollar text-blue-500"></i> 건별 신청 중개사무소
+                            </h3>
+                        </div>
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto shrink-0 justify-end overflow-x-auto pb-1 sm:pb-0">
                             <!-- 3 Stat Boxes -->
                             <div class="flex gap-2 shrink-0">
                                 <div class="bg-white border rounded-md px-3 py-1.5 shadow-sm flex items-center"><span class="text-[11px] font-bold text-gray-500 mr-2">총 신청</span><strong class="text-sm font-extrabold text-[rgb(33,33,33)]" id="s-stat-total">0</strong></div>
@@ -454,7 +457,7 @@
                                     <th class="px-3 py-3 text-blue-600 min-w-[60px]">매매</th>
                                     <th class="px-3 py-3 text-green-600 min-w-[60px]">임대차</th>
                                     <th class="px-3 py-3 text-gray-900 font-bold min-w-[60px]">합계</th>
-                                    <th class="px-4 py-3 text-left min-w-[100px]">가장 최근 신청일</th>
+                                    <th class="px-4 py-3 text-left min-w-[100px]">최근 신청일</th>
                                 </tr>
                             </thead>
                             <tbody id="st-tbody" class="divide-y divide-gray-100 align-middle">
@@ -1566,7 +1569,7 @@
                 { key: '종료일', label: '종료일', align: 'text-left', colsClass: 'w-[100px]' },
                 { key: '합계', label: '합계', align: 'text-center', colsClass: 'w-[60px]' },
                 { key: '매매', label: '매매', align: 'text-center', colsClass: 'w-[60px]' },
-                { key: '임대', label: '임대', align: 'text-center', colsClass: 'w-[60px]' },
+                { key: '임대차', label: '임대차', align: 'text-center', colsClass: 'w-[60px]' },
                 { key: '최근 신청일', label: '최근 신청일', align: 'text-left', colsClass: 'w-[100px]' },
                 { key: '상태', label: '상태', align: 'text-center', colsClass: 'w-[70px]' }
             ];
