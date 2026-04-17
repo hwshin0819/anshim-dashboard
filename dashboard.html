@@ -354,44 +354,119 @@
             <div class="flex flex-col gap-6 h-full">
                 
                 <!-- Top Panel: Premium Brokers -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden w-full max-h-[600px] min-h-[400px]">
-                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0 flex justify-between items-center">
-                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
-                            <i class="fa-solid fa-gem text-blue-500"></i> 프리미엄 중개사무소 <span id="premium-count" class="text-gray-500 text-sm font-medium"></span>
-                        </h3>
-                        <div class="relative w-48">
-                            <input type="text" id="leftSearch" placeholder="검색..." oninput="renderPremiumTables()" class="w-full text-sm border shadow-sm rounded-md pl-8 pr-3 py-1.5 outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors border-gray-300">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden w-full min-h-[400px]">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-4 w-full">
+                            <h3 class="font-bold text-gray-800 flex items-center gap-2 whitespace-nowrap">
+                                <i class="fa-solid fa-gem text-blue-500"></i> 프리미엄 중개사무소 <span id="premium-count" class="text-gray-500 text-sm font-medium"></span>
+                            </h3>
+                            <div class="flex items-center bg-gray-100 rounded-md p-1 shadow-inner text-xs font-semibold w-max" id="premium-filters">
+                                <button onclick="setPremiumFilter('전체')" class="px-3 py-1 rounded bg-white text-gray-800 shadow-sm transition-all" id="p-filter-all">전체</button>
+                                <button onclick="setPremiumFilter('활성')" class="px-3 py-1 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-200 transition-all" id="p-filter-active">활성</button>
+                                <button onclick="setPremiumFilter('긴급')" class="px-3 py-1 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-200 transition-all" id="p-filter-urgent">긴급</button>
+                                <button onclick="setPremiumFilter('계약종료')" class="px-3 py-1 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-200 transition-all" id="p-filter-expired">계약종료</button>
+                            </div>
+                        </div>
+                        <div class="relative w-full sm:w-64 shrink-0">
+                            <input type="text" id="leftSearch" placeholder="이름, 담당자 검색..." oninput="renderPremiumTables()" class="w-full text-sm border shadow-sm rounded-md pl-8 pr-3 py-1.5 outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors border-gray-300">
                             <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
                                 <i class="fa-solid fa-magnifying-glass text-gray-400 text-xs"></i>
                             </div>
                         </div>
                     </div>
-                    <div class="overflow-auto flex-1 bg-white">
-                        <table class="clean-table whitespace-nowrap text-xs w-full">
-                            <thead id="pt-thead" class="sticky top-0 bg-gray-50 z-10 shadow-sm border-b-2 text-center text-gray-600">
-                            </thead>
-                            <tbody id="pt-tbody" class="divide-y divide-gray-100 align-middle">
-                            </tbody>
-                        </table>
+                    
+                    <div class="flex flex-col lg:flex-row flex-1 overflow-hidden">
+                        <!-- LEFT WIDER: Table -->
+                        <div class="flex-1 overflow-auto bg-white border-r border-gray-100 lg:max-h-[500px]">
+                            <table class="clean-table whitespace-nowrap text-xs sm:text-sm w-full">
+                                <thead id="pt-thead" class="sticky top-0 bg-gray-50 z-10 shadow-sm border-b-2 text-center text-gray-600">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left min-w-[120px]">중개업소</th>
+                                        <th class="px-3 py-3 min-w-[80px]">담당자</th>
+                                        <th class="px-4 py-3 text-left min-w-[120px]">계약 만료일</th>
+                                        <th class="px-3 py-3 min-w-[80px]">총 신청</th>
+                                        <th class="px-4 py-3 text-left min-w-[120px]">마지막 신청</th>
+                                        <th class="px-3 py-3 min-w-[80px]">상태</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pt-tbody" class="divide-y divide-gray-100 align-middle">
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- RIGHT NARROW: 4 Metric Cards -->
+                        <div class="w-full lg:w-[280px] shrink-0 bg-gray-50 p-4 flex flex-col gap-3 overflow-y-auto border-t lg:border-t-0">
+                            <!-- Metric 1: 정상 -->
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-[#3B6D11]">
+                                <h4 class="text-xs font-bold text-gray-500 mb-1">정상 활용 중</h4>
+                                <div class="flex justify-between items-end">
+                                    <span class="text-3xl font-extrabold text-[#3B6D11] leading-none" id="p-stat-normal">0</span>
+                                    <span class="text-xs font-medium text-gray-400">2개월 내 사용</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Metric 2: 주의 -->
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-[#854F0B]">
+                                <h4 class="text-xs font-bold text-gray-500 mb-1">주의 <span class="font-medium text-[10px]">(2개월 미사용)</span></h4>
+                                <div class="flex justify-between items-end">
+                                    <span class="text-3xl font-extrabold text-[#854F0B] leading-none" id="p-stat-warn">0</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Metric 3: 긴급 -->
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-[#A32D2D]">
+                                <h4 class="text-xs font-bold text-gray-500 mb-1 flex items-center gap-1">긴급 <i class="fa-solid fa-triangle-exclamation text-[#A32D2D]"></i></h4>
+                                <div class="flex flex-col gap-1 mt-1">
+                                    <span class="text-3xl font-extrabold text-[#A32D2D] leading-none" id="p-stat-urgent">0</span>
+                                    <span class="text-[10px] font-medium text-gray-500 leading-tight">3개월+ 미사용 또는<br>만료 30일 이내</span>
+                                </div>
+                            </div>
+
+                            <!-- Metric 4: 계약종료 -->
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-[#888780]">
+                                <h4 class="text-xs font-bold text-gray-500 mb-1">계약종료</h4>
+                                <div class="flex justify-between items-end">
+                                    <span class="text-3xl font-extrabold text-[#888780] leading-none" id="p-stat-expired">0</span>
+                                    <span class="text-xs font-medium text-gray-400">미갱신</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Bottom Panel: Single Payment Brokers -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden w-full max-h-[600px] min-h-[400px]">
-                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0 flex justify-between items-center">
-                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden w-full min-h-[400px]">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                        <h3 class="font-bold text-gray-800 flex items-center gap-2 whitespace-nowrap">
                             <i class="fa-solid fa-file-invoice-dollar text-blue-500"></i> 건별 중개사무소 <span id="single-count" class="text-gray-500 text-sm font-medium"></span>
                         </h3>
-                        <div class="relative w-48">
-                            <input type="text" id="rightSearch" placeholder="검색..." oninput="renderPremiumTables()" class="w-full text-sm border shadow-sm rounded-md pl-8 pr-3 py-1.5 outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors border-gray-300">
-                            <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
-                                <i class="fa-solid fa-magnifying-glass text-gray-400 text-xs"></i>
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto overflow-x-auto pb-1 sm:pb-0">
+                            <!-- 3 Stat Boxes -->
+                            <div class="flex gap-2 shrink-0">
+                                <div class="bg-white border rounded-md px-3 py-1.5 shadow-sm flex items-center"><span class="text-[11px] font-bold text-gray-500 mr-2">총 신청</span><strong class="text-sm font-extrabold text-gray-800" id="s-stat-total">0</strong></div>
+                                <div class="bg-white border rounded-md px-3 py-1.5 shadow-sm flex items-center"><span class="text-[11px] font-bold text-gray-500 mr-2">매매</span><strong class="text-sm font-extrabold text-blue-600" id="s-stat-m">0</strong></div>
+                                <div class="bg-white border rounded-md px-3 py-1.5 shadow-sm flex items-center"><span class="text-[11px] font-bold text-gray-500 mr-2">임대차</span><strong class="text-sm font-extrabold text-green-600" id="s-stat-i">0</strong></div>
+                            </div>
+                            <!-- Search -->
+                            <div class="relative w-full sm:w-56 shrink-0">
+                                <input type="text" id="rightSearch" placeholder="중개업소, 담당자 검색..." oninput="renderPremiumTables()" class="w-full text-sm border shadow-sm rounded-md pl-8 pr-3 py-1.5 outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors border-gray-300">
+                                <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                    <i class="fa-solid fa-magnifying-glass text-gray-400 text-xs"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="overflow-auto flex-1 bg-white">
-                        <table class="clean-table whitespace-nowrap text-xs w-full">
+                    <div class="overflow-auto flex-1 bg-white lg:max-h-[500px]">
+                        <table class="clean-table whitespace-nowrap text-xs sm:text-sm w-full">
                             <thead id="st-thead" class="sticky top-0 bg-gray-50 z-10 shadow-sm border-b-2 text-center text-gray-600">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">중개업소</th>
+                                    <th class="px-3 py-3">시/도</th>
+                                    <th class="px-3 py-3">담당자</th>
+                                    <th class="px-3 py-3 text-blue-600">매매</th>
+                                    <th class="px-3 py-3 text-green-600">임대차</th>
+                                    <th class="px-3 py-3 text-gray-900 font-bold">합계</th>
+                                </tr>
                             </thead>
                             <tbody id="st-tbody" class="divide-y divide-gray-100 align-middle">
                             </tbody>
@@ -421,6 +496,7 @@
         let activeFilter = '전체'; // '이번달' | '전체' | 'custom'
         let customYear = '';
         let customMonth = '';
+        let currentPremiumFilter = '전체';
         
         // Chart object memory hooks
         let monthlyChart = null;
@@ -683,6 +759,23 @@
             }
 
             processDataset();
+        }
+
+        function setPremiumFilter(filterName) {
+            currentPremiumFilter = filterName;
+            const filters = ['전체', '활성', '긴급', '계약종료'];
+            const eIds = ['p-filter-all', 'p-filter-active', 'p-filter-urgent', 'p-filter-expired'];
+            
+            filters.forEach((f, idx) => {
+                const btn = document.getElementById(eIds[idx]);
+                if (!btn) return;
+                if (f === filterName) {
+                    btn.className = 'px-3 py-1 rounded bg-white text-gray-800 shadow-sm transition-all focus:outline-none';
+                } else {
+                    btn.className = 'px-3 py-1 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-200 transition-all focus:outline-none';
+                }
+            });
+            renderPremiumTables();
         }
 
         // ------------------------------------------------------------------
@@ -1259,130 +1352,224 @@
             }
         }
 
-        function generateMonthColumns() {
-            let cols = [];
-            let current = new Date(2024, 0, 1);
-            let now = new Date();
-            let end = new Date(now.getFullYear(), now.getMonth(), 1);
-            
-            while (current <= end) {
-                let m = `${current.getFullYear()}.${String(current.getMonth()+1).padStart(2, '0')}`;
-                let mKey = `${current.getFullYear()}-${String(current.getMonth()+1).padStart(2, '0')}`;
-                cols.push({ label: m, key: mKey });
-                current.setMonth(current.getMonth() + 1);
-            }
-            return cols;
-        }
-
         function renderPremiumTables() {
-            if (!rawBaseData || rawBaseData.length === 0) return;
+            if (!rawBaseData || premiumBrokersSheetData === undefined) return;
             
-            const months = generateMonthColumns();
+            const leftSearch = document.getElementById('leftSearch').value.toLowerCase().trim();
+            const rightSearch = document.getElementById('rightSearch').value.toLowerCase().trim();
             
-            // Build Theads
-            let thHTML = `<tr>
-                <th class="px-3 min-w-[150px]">중개업소</th>
-                <th class="px-2 whitespace-nowrap min-w-[60px]">시/도</th>
-                <th class="px-2 whitespace-nowrap min-w-[100px]">시/군/구</th>
-                <th class="px-2 min-w-[60px]">담당자</th>
-                <th class="px-2 whitespace-nowrap min-w-[80px]">실제 종료일</th>
-                <th class="px-2 whitespace-nowrap min-w-[70px]">계약상태</th>`;
-            months.forEach(m => {
-                thHTML += `<th class="px-2">${m.label}</th>`;
-            });
-            thHTML += `</tr>`;
+            // 1. Compute Base Data from rawBaseData
+            const appDatesMap = {}; // { 'brokerName': [Date1, Date2, ...] }
+            const singleBrokersDataMap = {}; // for 건별
             
-            document.getElementById('pt-thead').innerHTML = thHTML;
-            document.getElementById('st-thead').innerHTML = thHTML;
-            
-            const appCounts = {};
-            const singleBrokersDataMap = {};
-            
+            let sStatTotal = 0, sStatM = 0, sStatI = 0;
+
             rawBaseData.forEach(row => {
                 const bName = row.cVal || '';
                 if (!bName || bName === '미상') return;
                 
+                // Track application dates
                 const qVal = row.qVal || '';
-                const mMatch = qVal.match(/(\d{4})[-./](\d{1,2})/);
+                const mMatch = qVal.match(/(\d{4})[-./](\d{1,2})[-./](\d{1,2})/);
                 if (mMatch) {
-                    const mKey = `${mMatch[1]}-${String(mMatch[2]).padStart(2, '0')}`;
-                    if (!appCounts[bName]) appCounts[bName] = {};
-                    appCounts[bName][mKey] = (appCounts[bName][mKey] || 0) + 1;
+                    const appDate = new Date(mMatch[1], mMatch[2] - 1, mMatch[3]);
+                    if (!appDatesMap[bName]) appDatesMap[bName] = [];
+                    appDatesMap[bName].push(appDate);
                 }
                 
+                // Accumulate 건별 data
                 const sVal = row.sVal || '';
-                if (sVal.includes('건별') || sVal.includes('단건')) {
+                if (sVal.includes('건별') || sVal.includes('단건') || sVal.includes('일반결제(단건)')) {
                     if (!singleBrokersDataMap[bName]) {
                         let addrParts = (row.iVal || '').split(/\s+/);
                         let sido = addrParts.length > 0 ? addrParts[0] : '';
                         let sigungu = addrParts.length > 1 ? addrParts[1] : '';
                         singleBrokersDataMap[bName] = {
-                            name: bName, sido: sido, sigungu: sigungu, manager: '-', end_date: '-', status: '-'
+                            name: bName, sido: sido, sigungu: sigungu, manager: '-', countM: 0, countI: 0
                         };
+                    }
+                    sStatTotal++;
+                    const hVal = row.hVal || '';
+                    if (hVal === '매매') {
+                        singleBrokersDataMap[bName].countM++;
+                        sStatM++;
+                    } else if (hVal === '전세' || hVal === '월세' || hVal === '임대차') {
+                        singleBrokersDataMap[bName].countI++;
+                        sStatI++;
                     }
                 }
             });
 
-            const leftSearch = document.getElementById('leftSearch').value.toLowerCase().trim();
-            const rightSearch = document.getElementById('rightSearch').value.toLowerCase().trim();
+            // UPDATE SECTION 2 METRICS
+            document.getElementById('s-stat-total').innerText = sStatTotal;
+            document.getElementById('s-stat-m').innerText = sStatM;
+            document.getElementById('s-stat-i').innerText = sStatI;
 
-            const highlightZero = (count) => {
-                if (count === 0) {
-                    return `<span class="bg-red-100 text-red-600 font-bold px-1.5 py-0.5 rounded">0</span>`;
-                }
-                return `<span class="text-gray-900 font-semibold">${count}</span>`;
-            };
+            // 2. Compute Premium Brokers (Section 1)
+            let pNormal = 0, pWarn = 0, pUrgent = 0, pExpired = 0;
+            let premiumRenderList = [];
+            
+            const today = new Date();
+            const todayTime = today.getTime();
+            today.setHours(0,0,0,0);
+            
+            const twoMonthsAgo = new Date(today);
+            twoMonthsAgo.setMonth(today.getMonth() - 2);
+            const threeMonthsAgo = new Date(today);
+            threeMonthsAgo.setMonth(today.getMonth() - 3);
 
-            const generateTr = (brokerObj) => {
-                const name = brokerObj.name;
-                let statusHTML = brokerObj.status;
-                if (statusHTML === '유효') {
-                    statusHTML = `<span class="text-green-600 font-bold bg-green-50/80 px-1.5 py-0.5 rounded">유효</span>`;
-                } else if (statusHTML === '해지') {
-                    statusHTML = `<span class="text-gray-500 font-bold bg-gray-100 px-1.5 py-0.5 rounded">해지</span>`;
-                } else if (statusHTML === '-') {
-                    statusHTML = `<span class="text-gray-400">-</span>`;
+            premiumBrokersSheetData.forEach(pData => {
+                const bName = pData.name;
+                if (!bName) return;
+
+                // Dates calculation
+                let parsedExpiry = null;
+                let isRepay = false;
+
+                const repStr = String(pData.rep_date || '').replace(/\s+/g, '').replace(/\./g, '-');
+                if (repStr !== '' && repStr !== '-' && repStr.length >= 6) {
+                    let parts = repStr.split('-');
+                    if (parts.length >= 3) {
+                        const repD = new Date(parts[0], parts[1]-1, parts[2]);
+                        repD.setFullYear(repD.getFullYear() + 1);
+                        repD.setDate(repD.getDate() - 1);
+                        parsedExpiry = repD;
+                        isRepay = true;
+                    }
+                } 
+                if (!isRepay) {
+                    let endStr = String(pData.end_date || '').replace(/\s+/g, '').replace(/\./g, '-');
+                    if (endStr.endsWith('-')) endStr = endStr.slice(0, -1);
+                    let parts = endStr.split('-');
+                    if (parts.length >= 3) {
+                        parsedExpiry = new Date(parts[0], parts[1]-1, parts[2]);
+                    }
                 }
                 
-                let tdHTML = `<tr class="group hover:bg-blue-50/50 transition-colors text-center border-b border-gray-100 text-gray-700">
-                    <td class="px-3 font-semibold text-gray-900 text-left sticky left-0 bg-white group-hover:bg-blue-50/50 shadow-[1px_0_3px_-1px_rgba(0,0,0,0.1)]">${name}</td>
-                    <td class="px-2">${brokerObj.sido || '-'}</td>
-                    <td class="px-2 text-left">${brokerObj.sigungu || '-'}</td>
-                    <td class="px-2">${brokerObj.manager || '-'}</td>
-                    <td class="px-2">${brokerObj.end_date || '-'}</td>
-                    <td class="px-2">${statusHTML}</td>`;
+                let expiryDisp = '-';
+                if (parsedExpiry) {
+                    expiryDisp = `${parsedExpiry.getFullYear()}.${String(parsedExpiry.getMonth()+1).padStart(2,'0')}.${String(parsedExpiry.getDate()).padStart(2,'0')}`;
+                    if (isRepay) {
+                        expiryDisp += ` <span class="bg-amber-100 text-amber-800 border border-amber-200 text-[10px] px-1 rounded ml-1 font-bold shrink-0">재계약</span>`;
+                    }
+                }
+
+                // Apps
+                let lastAppDate = null;
+                let lastAppDisp = '-';
+                let totalApps = 0;
                 
-                months.forEach(m => {
-                    let c = (appCounts[name] && appCounts[name][m.key]) || 0;
-                    tdHTML += `<td class="px-2">${highlightZero(c)}</td>`;
-                });
-                tdHTML += `</tr>`;
-                return tdHTML;
-            };
+                if (appDatesMap[bName] && appDatesMap[bName].length > 0) {
+                    totalApps = appDatesMap[bName].length;
+                    const sortedApps = appDatesMap[bName].sort((a,b) => b - a);
+                    lastAppDate = sortedApps[0];
+                    lastAppDisp = `${lastAppDate.getFullYear()}.${String(lastAppDate.getMonth()+1).padStart(2,'0')}.${String(lastAppDate.getDate()).padStart(2,'0')}`;
+                }
 
-            // LEFT
-            let leftCount = 0;
-            let leftHTML = '';
-            (premiumBrokersSheetData || []).forEach(p => {
-                if (leftSearch && !p.name.toLowerCase().includes(leftSearch)) return;
-                leftHTML += generateTr(p);
-                leftCount++;
-            });
-            if (leftCount === 0) leftHTML = `<tr><td colspan="${6 + months.length}" class="py-10 text-gray-400">데이터가 없습니다.</td></tr>`;
-            document.getElementById('pt-tbody').innerHTML = leftHTML;
-            document.getElementById('premium-count').innerText = `(${leftCount}건)`;
+                // Determine Status
+                let statusCode = 0; // 1: Urgent, 2: Warn, 3: Normal, 4: Expired
+                let statusLabel = '';
+                let statusBg = '';
 
-            // RIGHT
-            let rightCount = 0;
-            let rightHTML = '';
-            Object.values(singleBrokersDataMap).forEach(s => {
-                if (rightSearch && !s.name.toLowerCase().includes(rightSearch)) return;
-                rightHTML += generateTr(s);
-                rightCount++;
+                if (parsedExpiry && parsedExpiry < today && !isRepay) {
+                    statusCode = 4;
+                    statusLabel = '계약종료';
+                    statusBg = 'bg-[#888780]';
+                    pExpired++;
+                } else {
+                    let daysToExpiry = Infinity;
+                    if (parsedExpiry) {
+                        daysToExpiry = (parsedExpiry - today) / (1000 * 60 * 60 * 24);
+                    }
+
+                    if (!lastAppDate || lastAppDate < threeMonthsAgo || daysToExpiry <= 30) {
+                        statusCode = 1;
+                        statusLabel = '긴급';
+                        statusBg = 'bg-[#A32D2D]';
+                        pUrgent++;
+                    } else if (lastAppDate >= threeMonthsAgo && lastAppDate < twoMonthsAgo) {
+                        statusCode = 2;
+                        statusLabel = '주의';
+                        statusBg = 'bg-[#854F0B]';
+                        pWarn++;
+                    } else {
+                        statusCode = 3;
+                        statusLabel = '정상';
+                        statusBg = 'bg-[#3B6D11]';
+                        pNormal++;
+                    }
+                }
+
+                const searchTarget = (bName + (pData.manager || '')).toLowerCase();
+                
+                // Match search & filters
+                let passSearch = !leftSearch || searchTarget.includes(leftSearch);
+                let passFilter = true;
+                if (currentPremiumFilter === '활성') passFilter = statusCode !== 4;
+                else if (currentPremiumFilter === '긴급') passFilter = statusCode === 1;
+                else if (currentPremiumFilter === '계약종료') passFilter = statusCode === 4;
+
+                if (passSearch && passFilter) {
+                    premiumRenderList.push({
+                        bName, manager: pData.manager || '-', expiryDisp, totalApps, lastAppDisp, statusCode, statusLabel, statusBg
+                    });
+                }
             });
-            if (rightCount === 0) rightHTML = `<tr><td colspan="${6 + months.length}" class="py-10 text-gray-400">건별 신청 데이터가 없습니다.</td></tr>`;
-            document.getElementById('st-tbody').innerHTML = rightHTML;
-            document.getElementById('single-count').innerText = `(${rightCount}건)`;
+
+            document.getElementById('p-stat-normal').innerText = pNormal;
+            document.getElementById('p-stat-warn').innerText = pWarn;
+            document.getElementById('p-stat-urgent').innerText = pUrgent;
+            document.getElementById('p-stat-expired').innerText = pExpired;
+            document.getElementById('premium-count').innerText = `(${premiumBrokersSheetData.length}사)`;
+
+            // Sort & Render Section 1
+            premiumRenderList.sort((a,b) => a.statusCode - b.statusCode);
+            
+            let pHTML = '';
+            if (premiumRenderList.length === 0) pHTML = `<tr><td colspan="6" class="py-10 text-gray-400 text-center">데이터가 없습니다.</td></tr>`;
+            premiumRenderList.forEach(item => {
+                let textClass = item.statusCode === 4 ? 'text-gray-400' : 'text-gray-800';
+                pHTML += `
+                    <tr class="hover:bg-gray-50 border-b border-gray-100 ${textClass} text-center">
+                        <td class="px-4 py-2 font-bold text-left">${item.bName}</td>
+                        <td class="px-3 py-2 text-gray-500">${item.manager}</td>
+                        <td class="px-4 py-2 text-left flex items-center">${item.expiryDisp}</td>
+                        <td class="px-3 py-2 font-semibold text-blue-600">${item.totalApps > 0 ? item.totalApps : '-'}</td>
+                        <td class="px-4 py-2 text-left">${item.lastAppDisp}</td>
+                        <td class="px-3 py-2 text-left">
+                            <span class="${item.statusBg} text-white px-2 py-0.5 rounded text-[11px] font-bold">${item.statusLabel}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('pt-tbody').innerHTML = pHTML;
+
+            // 3. Render Section 2 (Single Payment)
+            const singleList = Object.values(singleBrokersDataMap);
+            singleList.forEach(s => { s.total = s.countM + s.countI; });
+            singleList.sort((a,b) => b.total - a.total);
+
+            let sHTML = '';
+            let sCount = 0;
+            singleList.forEach(s => {
+                const searchTarget = (s.name + s.sido + s.sigungu + s.manager).toLowerCase();
+                if (rightSearch && !searchTarget.includes(rightSearch)) return;
+                
+                sCount++;
+                sHTML += `
+                    <tr class="hover:bg-gray-50 border-b border-gray-100 text-gray-800 text-center">
+                        <td class="px-4 py-2 font-bold text-left">${s.name}</td>
+                        <td class="px-3 py-2">${s.sido} ${s.sigungu}</td>
+                        <td class="px-3 py-2 text-gray-500">${s.manager}</td>
+                        <td class="px-3 py-2 font-medium text-blue-600">${s.countM > 0 ? s.countM : '-'}</td>
+                        <td class="px-3 py-2 font-medium text-green-600">${s.countI > 0 ? s.countI : '-'}</td>
+                        <td class="px-3 py-2 font-extrabold text-gray-900">${s.total}</td>
+                    </tr>
+                `;
+            });
+            if (sCount === 0) sHTML = `<tr><td colspan="6" class="py-10 text-gray-400 text-center">데이터가 없습니다.</td></tr>`;
+            document.getElementById('st-tbody').innerHTML = sHTML;
+            document.getElementById('single-count').innerText = `(${singleList.length}사)`;
         }
 
     </script>
