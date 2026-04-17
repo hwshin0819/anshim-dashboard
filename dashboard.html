@@ -405,14 +405,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Metric 3: 긴급 -->
-                            <div class="bg-[#ffebee] rounded-xl border border-[#ffebee] p-4 flex flex-col transition-shadow hover:shadow-sm">
-                                <h4 class="text-xs font-bold text-[#b71c1c]/80 mb-1 flex items-center gap-1">긴급</h4>
-                                <div class="flex flex-col gap-1 mt-auto">
-                                    <span class="text-3xl font-extrabold text-[#b71c1c] leading-none" id="p-stat-urgent">0</span>
-                                    <span class="text-[10px] font-medium text-[#b71c1c]/60 leading-tight">3개월+ 미사용 또는<br>만료 30일 이내</span>
-                                </div>
-                            </div>
 
                             <!-- Metric 4: 계약종료 -->
                             <div class="bg-[#f5f5f5] rounded-xl border border-[#f5f5f5] p-4 flex flex-col transition-shadow hover:shadow-sm">
@@ -1299,9 +1291,26 @@
                     
                     let pBadge = '';
                     if (row.cVal && row.cVal !== '미상' && row.cVal !== '-') {
-                        pBadge = globalPremiumBrokers.has(row.cVal) 
-                            ? `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#1A73E8] text-white text-[10px] font-bold shrink-0 ml-1 mt-[1px]">P</span>` 
-                            : `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#34A853] text-white text-[10px] font-bold shrink-0 ml-1 mt-[1px]">N</span>`;
+                        if (globalPremiumBrokers.has(row.cVal)) {
+                            let isExpired = false;
+                            const pRow = premiumBrokersSheetData.find(p => p.name === row.cVal);
+                            if (pRow) {
+                                const todayStr = new Date().toISOString().split('T')[0];
+                                let endStr = String(pRow.end_date || '').replace(/\s+/g, '').replace(/\./g, '-');
+                                if (endStr.endsWith('-')) endStr = endStr.slice(0, -1);
+                                let parts = endStr.split('-');
+                                if (parts.length >= 3) {
+                                    endStr = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+                                }
+                                const isRepay = String(pRow.rep_date || '').trim() !== '';
+                                if (endStr !== '' && endStr < todayStr && !isRepay) isExpired = true;
+                            }
+                            if (isExpired) {
+                                pBadge = `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#9e9e9e] text-white text-[10px] font-bold shrink-0 ml-1 mt-[1px]">P</span>`;
+                            } else {
+                                pBadge = `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#1A73E8] text-white text-[10px] font-bold shrink-0 ml-1 mt-[1px]">P</span>`;
+                            }
+                        }
                     }
 
                     html += `<tr class="${rowClass} hover:bg-blue-50/30 transition-colors border-b border-gray-100 last:border-0">
@@ -1493,7 +1502,7 @@
                 if (parsedExpiry && parsedExpiry < today && !isRepay) {
                     statusCode = 4;
                     statusLabel = '계약종료';
-                    statusBg = 'bg-[#9CA3AF]';
+                    statusBg = 'bg-[#f5f5f5] text-[#616161] border border-transparent';
                     pExpired++;
                 } else {
                     let daysToExpiry = Infinity;
@@ -1504,17 +1513,17 @@
                     if (!lastAppDate || lastAppDate < threeMonthsAgo || daysToExpiry <= 30) {
                         statusCode = 1;
                         statusLabel = '긴급';
-                        statusBg = 'bg-[#EF4444]';
+                        statusBg = 'bg-[#ffebee] text-[#b71c1c] border border-transparent';
                         pUrgent++;
                     } else if (lastAppDate >= threeMonthsAgo && lastAppDate < twoMonthsAgo) {
                         statusCode = 2;
                         statusLabel = '주의';
-                        statusBg = 'bg-[#F59E0B]';
+                        statusBg = 'bg-[#fff3e0] text-[#e65100] border border-[#ffcc80]';
                         pWarn++;
                     } else {
                         statusCode = 3;
                         statusLabel = '정상';
-                        statusBg = 'bg-[#00897B]';
+                        statusBg = 'bg-[#e8f5e9] text-[#1b5e20] border border-transparent';
                         pNormal++;
                     }
                 }
@@ -1538,7 +1547,6 @@
 
             document.getElementById('p-stat-normal').innerText = pNormal;
             document.getElementById('p-stat-warn').innerText = pWarn;
-            document.getElementById('p-stat-urgent').innerText = pUrgent;
             document.getElementById('p-stat-expired').innerText = pExpired;
             
             let pActive = pNormal + pWarn + pUrgent;
@@ -1559,10 +1567,10 @@
             
             let theadHTML = `<tr>`;
             pCols.forEach(col => {
-                let icon = '';
+                let icon = ' <span class="text-[#9e9e9e] text-[12px] font-bold align-middle">⇅</span>';
                 if (premiumSortCol === col.key) {
-                    if (premiumSortDir === 'asc') icon = ' <span class="text-[10px] text-blue-500">▲</span>';
-                    else if (premiumSortDir === 'desc') icon = ' <span class="text-[10px] text-blue-500">▼</span>';
+                    if (premiumSortDir === 'asc') icon = ' <span class="text-[#9e9e9e] text-[12px] font-bold align-middle">↑</span>';
+                    else if (premiumSortDir === 'desc') icon = ' <span class="text-[#9e9e9e] text-[12px] font-bold align-middle">↓</span>';
                 }
                 const activeClass = premiumSortCol === col.key ? 'text-gray-900 bg-gray-100/50' : '';
                 theadHTML += `<th class="px-2 py-3 ${col.align} ${col.minW} ${activeClass} cursor-pointer hover:bg-gray-100 transition-colors select-none" onclick="setPremiumSort('${col.key}')">${col.label}${icon}</th>`;
@@ -1610,7 +1618,7 @@
                         <td class="px-2 py-2 text-green-600 font-medium">${item.totalI > 0 ? item.totalI : '-'}</td>
                         <td class="px-4 py-2 text-left">${item.lastAppDisp}</td>
                         <td class="px-3 py-2 text-left">
-                            <span class="${item.statusBg} text-white px-2 py-0.5 rounded text-[11px] font-bold shadow-sm">${item.statusLabel}</span>
+                            <span class="${item.statusBg} px-2 py-0.5 rounded text-[11px] font-bold shadow-sm">${item.statusLabel}</span>
                         </td>
                     </tr>
                 `;
