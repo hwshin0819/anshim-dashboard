@@ -1454,7 +1454,7 @@
             document.getElementById('s-stat-i').innerText = sStatI;
 
             // 2. Compute Premium Brokers (Section 1)
-            let pNormal = 0, pWarn = 0, pUrgent = 0, pExpired = 0;
+            let pNormal = 0, pWarn = 0, pExpired = 0;
             let premiumRenderList = [];
             
             const today = new Date();
@@ -1526,17 +1526,7 @@
                     statusBg = 'bg-[#f5f5f5] text-[#616161] border border-transparent';
                     pExpired++;
                 } else {
-                    let daysToExpiry = Infinity;
-                    if (parsedExpiry) {
-                        daysToExpiry = (parsedExpiry - today) / (1000 * 60 * 60 * 24);
-                    }
-
-                    if (!lastAppDate || lastAppDate < threeMonthsAgo || daysToExpiry <= 30) {
-                        statusCode = 1;
-                        statusLabel = '주의';
-                        statusBg = 'bg-[rgb(255,243,224)] text-[rgb(230,81,0)] border border-[rgb(255,204,128)]';
-                        pUrgent++;
-                    } else if (lastAppDate >= threeMonthsAgo && lastAppDate < twoMonthsAgo) {
+                    if (!lastAppDate || lastAppDate < twoMonthsAgo) {
                         statusCode = 2;
                         statusLabel = '주의';
                         statusBg = 'bg-[rgb(255,243,224)] text-[rgb(230,81,0)] border border-[rgb(255,204,128)]';
@@ -1570,14 +1560,14 @@
             document.getElementById('p-stat-warn').innerText = pWarn;
             document.getElementById('p-stat-expired').innerText = pExpired;
             
-            let pActive = pNormal + pWarn + pUrgent;
+            let pActive = pNormal + pWarn;
             const psa = document.getElementById('p-stat-active');
             if (psa) psa.innerText = pActive;
             document.getElementById('premium-count').innerText = `(활성 ${pActive}개)`;
 
             // Sort & Render Section 1
             const pCols = [
-                { key: '상태', label: '상태', align: 'text-center', colsClass: 'w-[60px]' },
+                { key: '계약', label: '계약', align: 'text-center', colsClass: 'w-[60px]' },
                 { key: '중개업소', label: '중개업소', align: 'text-left', colsClass: 'w-[160px]' },
                 { key: '담당자', label: '담당자', align: 'text-center', colsClass: 'w-[80px]' },
                 { key: '계약 만료일', label: '계약 만료일', align: 'text-left', colsClass: 'w-[100px]' },
@@ -1585,7 +1575,7 @@
                 { key: '매매', label: '매매', align: 'text-center', colsClass: 'w-[60px]' },
                 { key: '임대차', label: '임대차', align: 'text-center', colsClass: 'w-[60px]' },
                 { key: '마지막 신청', label: '마지막 신청', align: 'text-left', colsClass: 'w-[90px]' },
-                { key: '액션상태', label: '액션상태', align: 'text-center', colsClass: 'w-[70px]' }
+                { key: '상태', label: '상태', align: 'text-center', colsClass: 'w-[70px]' }
             ];
             
             let theadHTML = `<tr>`;
@@ -1605,7 +1595,7 @@
                 premiumRenderList.sort((a,b) => {
                     let valA, valB;
                     switch(premiumSortCol) {
-                        case '상태': valA = a.isLive ? 1 : 0; valB = b.isLive ? 1 : 0; break;
+                        case '계약': valA = a.isLive ? 1 : 0; valB = b.isLive ? 1 : 0; break;
                         case '중개업소': valA = a.bName; valB = b.bName; break;
                         case '담당자': valA = a.manager; valB = b.manager; break;
                         case '계약 만료일': valA = a.expiryDisp === '-' ? '' : a.expiryDisp; valB = b.expiryDisp === '-' ? '' : b.expiryDisp; break;
@@ -1613,7 +1603,7 @@
                         case '매매': valA = a.totalM; valB = b.totalM; break;
                         case '임대차': valA = a.totalI; valB = b.totalI; break;
                         case '마지막 신청': valA = a.lastAppDisp === '-' ? '' : a.lastAppDisp; valB = b.lastAppDisp === '-' ? '' : b.lastAppDisp; break;
-                        case '액션상태': valA = a.statusCode; valB = b.statusCode; break;
+                        case '상태': valA = a.statusCode; valB = b.statusCode; break;
                     }
                     if (valA === valB) return 0;
                     if (typeof valA === 'string' && typeof valB === 'string') {
