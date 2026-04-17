@@ -385,9 +385,9 @@
                             </table>
                         </div>
 
-                        <!-- RIGHT NARROW: 4 Metric Cards Grid -->
-                        <div class="w-full lg:w-[320px] shrink-0 bg-gray-50 p-4 flex flex-col items-center justify-start border-t lg:border-t-0">
-                            <div class="grid grid-cols-2 gap-[10px] w-full">
+                        <!-- RIGHT NARROW: 4 Metric Cards Stack -->
+                        <div class="w-full lg:w-1/4 shrink-0 bg-gray-50 p-4 flex flex-col items-center justify-start border-t lg:border-t-0 overflow-y-auto">
+                            <div class="grid grid-cols-1 gap-3 w-full">
                                 <!-- Top-left: 활성 중개사무소 수 -->
                                 <div class="bg-[rgb(232,240,254)] rounded-[8px] p-4 flex flex-col">
                                     <h4 class="text-[12px] font-bold text-[rgb(25,103,210)] mb-1 leading-tight">활성 중개사무소 수</h4>
@@ -1564,7 +1564,7 @@
             // Sort & Render Section 1
             const pCols = [
                 { key: '계약', label: '계약', align: 'text-center', colsClass: 'w-[60px]' },
-                { key: '중개업소', label: '중개업소', align: 'text-left', colsClass: 'w-[160px]' },
+                { key: '중개업소', label: '중개업소', align: 'text-left', colsClass: 'w-[200px]' },
                 { key: '담당자', label: '담당자', align: 'text-center', colsClass: 'w-[80px]' },
                 { key: '계약 만료일', label: '계약 만료일', align: 'text-left', colsClass: 'w-[100px]' },
                 { key: '총 신청', label: '총 신청', align: 'text-center', colsClass: 'w-[60px]' },
@@ -1619,7 +1619,7 @@
                 pHTML += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100 ${textClass} text-center">
                         <td class="px-2 py-2 truncate">${liveCol}</td>
-                        <td class="px-4 py-2 font-bold text-left max-w-[160px] overflow-hidden text-ellipsis whitespace-nowrap" title="${item.bName}">${item.bName}</td>
+                        <td class="px-4 py-2 font-bold text-left max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap" title="${item.bName}">${item.bName}</td>
                         <td class="px-3 py-2 text-gray-500 truncate">${item.manager}</td>
                         <td class="px-4 py-2 text-left truncate">${item.expiryDisp}</td>
                         <td class="px-2 py-2 font-semibold truncate">${item.totalApps > 0 ? item.totalApps : '-'}</td>
