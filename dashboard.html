@@ -367,16 +367,10 @@
                                 <button onclick="setPremiumFilter('계약종료')" class="px-3 py-1 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-200 transition-all" id="p-filter-expired">계약종료</button>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 relative w-full sm:w-auto shrink-0">
-                            <select id="premium-sort" onchange="renderPremiumTables()" class="text-sm border border-gray-300 shadow-sm rounded-md py-1.5 px-2 text-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white">
-                                <option value="asc">A-Z</option>
-                                <option value="desc">Z-A</option>
-                            </select>
-                            <div class="relative w-full sm:w-64 shrink-0">
-                                <input type="text" id="leftSearch" placeholder="이름, 담당자 검색..." oninput="renderPremiumTables()" class="w-full text-sm border shadow-sm rounded-md pl-8 pr-3 py-1.5 outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors border-gray-300">
-                                <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
-                                    <i class="fa-solid fa-magnifying-glass text-gray-400 text-xs"></i>
-                                </div>
+                        <div class="relative w-full sm:w-64 shrink-0">
+                            <input type="text" id="leftSearch" placeholder="이름, 담당자 검색..." oninput="renderPremiumTables()" class="w-full text-sm border shadow-sm rounded-md pl-8 pr-3 py-1.5 outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors border-gray-300">
+                            <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-magnifying-glass text-gray-400 text-xs"></i>
                             </div>
                         </div>
                     </div>
@@ -386,17 +380,6 @@
                         <div class="flex-1 overflow-auto bg-white border-r border-gray-100 lg:max-h-[500px]">
                             <table class="clean-table whitespace-nowrap text-xs sm:text-sm w-full">
                                 <thead id="pt-thead" class="sticky top-0 bg-gray-50 z-10 shadow-sm border-b-2 text-center text-gray-600">
-                                    <tr>
-                                        <th class="px-2 py-3 text-center min-w-[60px]">상태</th>
-                                        <th class="px-4 py-3 text-left min-w-[120px]">중개업소</th>
-                                        <th class="px-3 py-3 min-w-[80px]">담당자</th>
-                                        <th class="px-4 py-3 text-left min-w-[100px]">계약 만료일</th>
-                                        <th class="px-2 py-3 min-w-[60px]">총 신청</th>
-                                        <th class="px-2 py-3 min-w-[60px]">매매</th>
-                                        <th class="px-2 py-3 min-w-[60px]">임대차</th>
-                                        <th class="px-4 py-3 text-left min-w-[100px]">마지막 신청</th>
-                                        <th class="px-3 py-3 min-w-[60px]">액션상태</th>
-                                    </tr>
                                 </thead>
                                 <tbody id="pt-tbody" class="divide-y divide-gray-100 align-middle">
                                 </tbody>
@@ -406,37 +389,37 @@
                         <!-- RIGHT NARROW: 4 Metric Cards -->
                         <div class="w-full lg:w-[280px] shrink-0 bg-gray-50 p-4 flex flex-col gap-3 overflow-y-auto border-t lg:border-t-0">
                             <!-- Metric 1: 정상 -->
-                            <div class="bg-[#00897B]/5 rounded-xl border border-[#00897B]/20 p-4 flex flex-col transition-shadow hover:shadow-sm">
-                                <h4 class="text-xs font-bold text-[#00897B]/80 mb-1">정상 활용 중</h4>
+                            <div class="bg-[#e8f5e9] rounded-xl border border-[#e8f5e9] p-4 flex flex-col transition-shadow hover:shadow-sm">
+                                <h4 class="text-xs font-bold text-[#1b5e20]/80 mb-1">정상 활용 중</h4>
                                 <div class="flex justify-between items-end mt-auto">
-                                    <span class="text-3xl font-extrabold text-[#00897B] leading-none" id="p-stat-normal">0</span>
-                                    <span class="text-xs font-medium text-[#00897B]/60">2개월 내 사용</span>
+                                    <span class="text-3xl font-extrabold text-[#1b5e20] leading-none" id="p-stat-normal">0</span>
+                                    <span class="text-xs font-medium text-[#1b5e20]/60">2개월 내 사용</span>
                                 </div>
                             </div>
                             
                             <!-- Metric 2: 주의 -->
-                            <div class="bg-[#00897B]/5 rounded-xl border border-[#00897B]/20 p-4 flex flex-col transition-shadow hover:shadow-sm">
-                                <h4 class="text-xs font-bold text-[#00897B]/80 mb-1">주의 <span class="font-medium text-[10px]">(2개월 미사용)</span></h4>
+                            <div class="bg-[#fff3e0] rounded-xl border border-[#fff3e0] p-4 flex flex-col transition-shadow hover:shadow-sm">
+                                <h4 class="text-xs font-bold text-[#e65100]/80 mb-1">주의 <span class="font-medium text-[10px]">(2개월 미사용)</span></h4>
                                 <div class="flex justify-between items-end mt-auto">
-                                    <span class="text-3xl font-extrabold text-[#00897B] leading-none" id="p-stat-warn">0</span>
+                                    <span class="text-3xl font-extrabold text-[#e65100] leading-none" id="p-stat-warn">0</span>
                                 </div>
                             </div>
                             
                             <!-- Metric 3: 긴급 -->
-                            <div class="bg-[#00897B]/5 rounded-xl border border-[#00897B]/20 p-4 flex flex-col transition-shadow hover:shadow-sm">
-                                <h4 class="text-xs font-bold text-[#00897B]/80 mb-1 flex items-center gap-1">긴급</h4>
+                            <div class="bg-[#ffebee] rounded-xl border border-[#ffebee] p-4 flex flex-col transition-shadow hover:shadow-sm">
+                                <h4 class="text-xs font-bold text-[#b71c1c]/80 mb-1 flex items-center gap-1">긴급</h4>
                                 <div class="flex flex-col gap-1 mt-auto">
-                                    <span class="text-3xl font-extrabold text-[#00897B] leading-none" id="p-stat-urgent">0</span>
-                                    <span class="text-[10px] font-medium text-[#00897B]/60 leading-tight">3개월+ 미사용 또는<br>만료 30일 이내</span>
+                                    <span class="text-3xl font-extrabold text-[#b71c1c] leading-none" id="p-stat-urgent">0</span>
+                                    <span class="text-[10px] font-medium text-[#b71c1c]/60 leading-tight">3개월+ 미사용 또는<br>만료 30일 이내</span>
                                 </div>
                             </div>
 
                             <!-- Metric 4: 계약종료 -->
-                            <div class="bg-[#00897B]/5 rounded-xl border border-[#00897B]/20 p-4 flex flex-col transition-shadow hover:shadow-sm">
-                                <h4 class="text-xs font-bold text-[#00897B]/80 mb-1">계약종료</h4>
+                            <div class="bg-[#f5f5f5] rounded-xl border border-[#f5f5f5] p-4 flex flex-col transition-shadow hover:shadow-sm">
+                                <h4 class="text-xs font-bold text-[#616161]/80 mb-1">계약종료</h4>
                                 <div class="flex justify-between items-end mt-auto">
-                                    <span class="text-3xl font-extrabold text-[#00897B] leading-none" id="p-stat-expired">0</span>
-                                    <span class="text-xs font-medium text-[#00897B]/60">미갱신</span>
+                                    <span class="text-3xl font-extrabold text-[#616161] leading-none" id="p-stat-expired">0</span>
+                                    <span class="text-xs font-medium text-[#616161]/60">미갱신</span>
                                 </div>
                             </div>
                         </div>
@@ -784,6 +767,22 @@
                     btn.className = 'px-3 py-1 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-200 transition-all focus:outline-none';
                 }
             });
+            renderPremiumTables();
+        }
+
+        let premiumSortCol = '';
+        let premiumSortDir = '';
+
+        function setPremiumSort(col) {
+            if (premiumSortCol === col) {
+                if (premiumSortDir === 'asc') premiumSortDir = 'desc';
+                else if (premiumSortDir === 'desc') premiumSortDir = '';
+                else premiumSortDir = 'asc';
+            } else {
+                premiumSortCol = col;
+                premiumSortDir = 'asc';
+            }
+            if (premiumSortDir === '') premiumSortCol = '';
             renderPremiumTables();
         }
 
@@ -1546,18 +1545,60 @@
             document.getElementById('premium-count').innerText = `(활성 ${pActive}개)`;
 
             // Sort & Render Section 1
-            const sortVal = document.getElementById('premium-sort') ? document.getElementById('premium-sort').value : 'asc';
-            if (sortVal === 'asc') {
-                premiumRenderList.sort((a,b) => a.bName.localeCompare(b.bName));
+            const pCols = [
+                { key: '상태', label: '상태', align: 'text-center', minW: 'min-w-[60px]' },
+                { key: '중개업소', label: '중개업소', align: 'text-left', minW: 'min-w-[120px]' },
+                { key: '담당자', label: '담당자', align: 'text-center', minW: 'min-w-[80px]' },
+                { key: '계약 만료일', label: '계약 만료일', align: 'text-left', minW: 'min-w-[100px]' },
+                { key: '총 신청', label: '총 신청', align: 'text-center', minW: 'min-w-[60px]' },
+                { key: '매매', label: '매매', align: 'text-center', minW: 'min-w-[60px]' },
+                { key: '임대차', label: '임대차', align: 'text-center', minW: 'min-w-[60px]' },
+                { key: '마지막 신청', label: '마지막 신청', align: 'text-left', minW: 'min-w-[100px]' },
+                { key: '액션상태', label: '액션상태', align: 'text-center', minW: 'min-w-[60px]' }
+            ];
+            
+            let theadHTML = `<tr>`;
+            pCols.forEach(col => {
+                let icon = '';
+                if (premiumSortCol === col.key) {
+                    if (premiumSortDir === 'asc') icon = ' <span class="text-[10px] text-blue-500">▲</span>';
+                    else if (premiumSortDir === 'desc') icon = ' <span class="text-[10px] text-blue-500">▼</span>';
+                }
+                const activeClass = premiumSortCol === col.key ? 'text-gray-900 bg-gray-100/50' : '';
+                theadHTML += `<th class="px-2 py-3 ${col.align} ${col.minW} ${activeClass} cursor-pointer hover:bg-gray-100 transition-colors select-none" onclick="setPremiumSort('${col.key}')">${col.label}${icon}</th>`;
+            });
+            theadHTML += `</tr>`;
+            document.getElementById('pt-thead').innerHTML = theadHTML;
+
+            if (premiumSortCol && premiumSortDir) {
+                premiumRenderList.sort((a,b) => {
+                    let valA, valB;
+                    switch(premiumSortCol) {
+                        case '상태': valA = a.isLive ? 1 : 0; valB = b.isLive ? 1 : 0; break;
+                        case '중개업소': valA = a.bName; valB = b.bName; break;
+                        case '담당자': valA = a.manager; valB = b.manager; break;
+                        case '계약 만료일': valA = a.expiryDisp === '-' ? '' : a.expiryDisp; valB = b.expiryDisp === '-' ? '' : b.expiryDisp; break;
+                        case '총 신청': valA = a.totalApps; valB = b.totalApps; break;
+                        case '매매': valA = a.totalM; valB = b.totalM; break;
+                        case '임대차': valA = a.totalI; valB = b.totalI; break;
+                        case '마지막 신청': valA = a.lastAppDisp === '-' ? '' : a.lastAppDisp; valB = b.lastAppDisp === '-' ? '' : b.lastAppDisp; break;
+                        case '액션상태': valA = a.statusCode; valB = b.statusCode; break;
+                    }
+                    if (valA === valB) return 0;
+                    if (typeof valA === 'string' && typeof valB === 'string') {
+                        return premiumSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                    }
+                    return premiumSortDir === 'asc' ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+                });
             } else {
-                premiumRenderList.sort((a,b) => b.bName.localeCompare(a.bName));
+                premiumRenderList.sort((a,b) => a.statusCode - b.statusCode);
             }
             
             let pHTML = '';
             if (premiumRenderList.length === 0) pHTML = `<tr><td colspan="9" class="py-10 text-gray-400 text-center">데이터가 없습니다.</td></tr>`;
             premiumRenderList.forEach(item => {
                 let textClass = item.statusCode === 4 ? 'text-gray-400' : 'text-gray-800';
-                let liveCol = item.isLive ? `<span class="bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[11px] font-bold">LIVE</span>` : `<span class="bg-gray-100 text-gray-500 border border-gray-200 px-2 py-0.5 rounded text-[11px] font-bold">종료</span>`;
+                let liveCol = item.isLive ? `<span class="bg-[#e8f0fe] text-[#1967d2] border border-[#d2e3fc] px-2 py-0.5 rounded text-[11px] font-bold">LIVE</span>` : `<span class="bg-[#f5f5f5] text-[#616161] border border-gray-200 px-2 py-0.5 rounded text-[11px] font-bold">종료</span>`;
                 pHTML += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100 ${textClass} text-center">
                         <td class="px-2 py-2">${liveCol}</td>
