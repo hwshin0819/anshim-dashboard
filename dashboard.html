@@ -350,11 +350,11 @@
         </div>
 
         <!-- NEW PREMIUM VIEW -->
-        <div id="view-premium" class="max-w-[1600px] mx-auto flex flex-col gap-6 hidden h-full">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-[600px]">
+        <div id="view-premium" class="max-w-7xl mx-auto flex flex-col gap-6 hidden h-full pb-8">
+            <div class="flex flex-col gap-6 h-full">
                 
-                <!-- Left Panel: Premium Brokers -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden h-full">
+                <!-- Top Panel: Premium Brokers -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden w-full max-h-[600px] min-h-[400px]">
                     <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0 flex justify-between items-center">
                         <h3 class="font-bold text-gray-800 flex items-center gap-2">
                             <i class="fa-solid fa-gem text-blue-500"></i> 프리미엄 중개사무소 <span id="premium-count" class="text-gray-500 text-sm font-medium"></span>
@@ -376,11 +376,11 @@
                     </div>
                 </div>
 
-                <!-- Right Panel: Single Payment Brokers -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden h-full">
+                <!-- Bottom Panel: Single Payment Brokers -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden w-full max-h-[600px] min-h-[400px]">
                     <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0 flex justify-between items-center">
                         <h3 class="font-bold text-gray-800 flex items-center gap-2">
-                            <i class="fa-solid fa-file-invoice-dollar text-blue-500"></i> 건별 신청 중개사무소 <span id="single-count" class="text-gray-500 text-sm font-medium"></span>
+                            <i class="fa-solid fa-file-invoice-dollar text-blue-500"></i> 건별 중개사무소 <span id="single-count" class="text-gray-500 text-sm font-medium"></span>
                         </h3>
                         <div class="relative w-48">
                             <input type="text" id="rightSearch" placeholder="검색..." oninput="renderPremiumTables()" class="w-full text-sm border shadow-sm rounded-md pl-8 pr-3 py-1.5 outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors border-gray-300">
@@ -431,6 +431,7 @@
 
         // Table State
         let tableData = [];
+        let premiumBrokersSheetData = [];
         let globalPremiumBrokers = new Set();
         let tableCurrentPage = 1;
         const TABLE_ROWS_PER_PAGE = 20;
@@ -922,9 +923,21 @@
                         const premiumRow = premiumBrokersSheetData.find(p => p.name === agencyName);
                         if (premiumRow) {
                             const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-                            const endStr = premiumRow.end_date.replace(/\./g, '-');
-                            const isRepay = premiumRow.rep_date !== '';
-                            const isExpired = endStr < todayStr && !isRepay;
+                            
+                            // Normalize date format from "2024. 3. 5" or "2024.03.05" to "2024-03-05"
+                            let endStr = String(premiumRow.end_date || '').replace(/\s+/g, '').replace(/\./g, '-');
+                            if (endStr.endsWith('-')) endStr = endStr.slice(0, -1);
+                            let parts = endStr.split('-');
+                            if (parts.length >= 3) {
+                                endStr = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+                            }
+                            
+                            const isRepayStr = String(premiumRow.rep_date || '').trim();
+                            const isRepay = isRepayStr !== '';
+                            
+                            // Only expire if endStr exists and is strictly less than today, and no repayment
+                            const isExpired = endStr !== '' && endStr < todayStr && !isRepay;
+                            
                             if (isExpired) textStyle = 'text-[#aaaaaa]';
                         }
                     }
