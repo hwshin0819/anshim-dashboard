@@ -406,7 +406,7 @@
                                 
                                 <!-- Bottom-left: 주의 -->
                                 <div class="bg-[rgb(255,243,224)] rounded-[8px] p-4 flex flex-col">
-                                    <h4 class="text-[12px] font-bold text-[rgb(230,81,0)] mb-1 leading-tight">주의 <span class="block text-[10px] font-medium mt-0.5">(2개월 미사용)</span></h4>
+                                    <h4 class="text-[12px] font-bold text-[rgb(230,81,0)] mb-1 leading-tight">주의 <span class="block text-[10px] font-medium mt-0.5">(1개월 이상 미사용)</span></h4>
                                     <div class="flex items-end mt-auto">
                                         <span class="text-[22px] font-medium text-[rgb(230,81,0)] leading-none" id="p-stat-warn">0</span>
                                     </div>
@@ -1459,10 +1459,8 @@
             const todayTime = today.getTime();
             today.setHours(0,0,0,0);
             
-            const twoMonthsAgo = new Date(today);
-            twoMonthsAgo.setMonth(today.getMonth() - 2);
-            const threeMonthsAgo = new Date(today);
-            threeMonthsAgo.setMonth(today.getMonth() - 3);
+            const oneMonthAgo = new Date(today);
+            oneMonthAgo.setMonth(today.getMonth() - 1);
 
             premiumBrokersSheetData.forEach(pData => {
                 const bName = pData.name;
@@ -1524,7 +1522,7 @@
                     statusBg = 'bg-[#f5f5f5] text-[#616161] border border-transparent';
                     pExpired++;
                 } else {
-                    if (!lastAppDate || lastAppDate < twoMonthsAgo) {
+                    if (!lastAppDate || lastAppDate < oneMonthAgo) {
                         statusCode = 2;
                         statusLabel = '주의';
                         statusBg = 'bg-[rgb(255,243,224)] text-[rgb(230,81,0)] border border-[rgb(255,204,128)]';
