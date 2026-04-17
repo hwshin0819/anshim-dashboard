@@ -1563,14 +1563,13 @@
 
             // Sort & Render Section 1
             const pCols = [
-                { key: '계약', label: '계약', align: 'text-center', colsClass: 'w-[60px]' },
                 { key: '중개업소', label: '중개업소', align: 'text-left', colsClass: 'w-[200px]' },
                 { key: '담당자', label: '담당자', align: 'text-center', colsClass: 'w-[80px]' },
-                { key: '계약 만료일', label: '계약 만료일', align: 'text-left', colsClass: 'w-[100px]' },
-                { key: '총 신청', label: '총 신청', align: 'text-center', colsClass: 'w-[60px]' },
+                { key: '종료일', label: '종료일', align: 'text-left', colsClass: 'w-[100px]' },
+                { key: '합계', label: '합계', align: 'text-center', colsClass: 'w-[60px]' },
                 { key: '매매', label: '매매', align: 'text-center', colsClass: 'w-[60px]' },
-                { key: '임대차', label: '임대차', align: 'text-center', colsClass: 'w-[60px]' },
-                { key: '마지막 신청', label: '마지막 신청', align: 'text-left', colsClass: 'w-[90px]' },
+                { key: '임대', label: '임대', align: 'text-center', colsClass: 'w-[60px]' },
+                { key: '최근 신청일', label: '최근 신청일', align: 'text-left', colsClass: 'w-[100px]' },
                 { key: '상태', label: '상태', align: 'text-center', colsClass: 'w-[70px]' }
             ];
             
@@ -1591,14 +1590,13 @@
                 premiumRenderList.sort((a,b) => {
                     let valA, valB;
                     switch(premiumSortCol) {
-                        case '계약': valA = a.isLive ? 1 : 0; valB = b.isLive ? 1 : 0; break;
                         case '중개업소': valA = a.bName; valB = b.bName; break;
                         case '담당자': valA = a.manager; valB = b.manager; break;
-                        case '계약 만료일': valA = a.expiryDisp === '-' ? '' : a.expiryDisp; valB = b.expiryDisp === '-' ? '' : b.expiryDisp; break;
-                        case '총 신청': valA = a.totalApps; valB = b.totalApps; break;
+                        case '종료일': valA = a.expiryDisp === '-' ? '' : a.expiryDisp; valB = b.expiryDisp === '-' ? '' : b.expiryDisp; break;
+                        case '합계': valA = a.totalApps; valB = b.totalApps; break;
                         case '매매': valA = a.totalM; valB = b.totalM; break;
-                        case '임대차': valA = a.totalI; valB = b.totalI; break;
-                        case '마지막 신청': valA = a.lastAppDisp === '-' ? '' : a.lastAppDisp; valB = b.lastAppDisp === '-' ? '' : b.lastAppDisp; break;
+                        case '임대': valA = a.totalI; valB = b.totalI; break;
+                        case '최근 신청일': valA = a.lastAppDisp === '-' ? '' : a.lastAppDisp; valB = b.lastAppDisp === '-' ? '' : b.lastAppDisp; break;
                         case '상태': valA = a.statusCode; valB = b.statusCode; break;
                     }
                     if (valA === valB) return 0;
@@ -1612,13 +1610,11 @@
             }
             
             let pHTML = '';
-            if (premiumRenderList.length === 0) pHTML = `<tr><td colspan="9" class="py-10 text-gray-400 text-center">데이터가 없습니다.</td></tr>`;
+            if (premiumRenderList.length === 0) pHTML = `<tr><td colspan="8" class="py-10 text-gray-400 text-center">데이터가 없습니다.</td></tr>`;
             premiumRenderList.forEach(item => {
                 let textClass = item.statusCode === 4 ? 'text-gray-400' : 'text-gray-800';
-                let liveCol = item.isLive ? `<span class="bg-[#e8f0fe] text-[#1967d2] border border-[#d2e3fc] px-2 py-0.5 rounded text-[11px] font-bold">LIVE</span>` : `<span class="bg-[#f5f5f5] text-[#616161] border border-gray-200 px-2 py-0.5 rounded text-[11px] font-bold">종료</span>`;
                 pHTML += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100 ${textClass} text-center">
-                        <td class="px-2 py-2 truncate">${liveCol}</td>
                         <td class="px-4 py-2 font-bold text-left max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap" title="${item.bName}">${item.bName}</td>
                         <td class="px-3 py-2 text-gray-500 truncate">${item.manager}</td>
                         <td class="px-4 py-2 text-left truncate">${item.expiryDisp}</td>
