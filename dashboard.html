@@ -367,10 +367,16 @@
                                 <button onclick="setPremiumFilter('계약종료')" class="px-3 py-1 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-200 transition-all" id="p-filter-expired">계약종료</button>
                             </div>
                         </div>
-                        <div class="relative w-full sm:w-64 shrink-0">
-                            <input type="text" id="leftSearch" placeholder="이름, 담당자 검색..." oninput="renderPremiumTables()" class="w-full text-sm border shadow-sm rounded-md pl-8 pr-3 py-1.5 outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors border-gray-300">
-                            <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
-                                <i class="fa-solid fa-magnifying-glass text-gray-400 text-xs"></i>
+                        <div class="flex items-center gap-2 relative w-full sm:w-auto shrink-0">
+                            <select id="premium-sort" onchange="renderPremiumTables()" class="text-sm border border-gray-300 shadow-sm rounded-md py-1.5 px-2 text-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white">
+                                <option value="asc">A-Z</option>
+                                <option value="desc">Z-A</option>
+                            </select>
+                            <div class="relative w-full sm:w-64 shrink-0">
+                                <input type="text" id="leftSearch" placeholder="이름, 담당자 검색..." oninput="renderPremiumTables()" class="w-full text-sm border shadow-sm rounded-md pl-8 pr-3 py-1.5 outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors border-gray-300">
+                                <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                    <i class="fa-solid fa-magnifying-glass text-gray-400 text-xs"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -381,7 +387,7 @@
                             <table class="clean-table whitespace-nowrap text-xs sm:text-sm w-full">
                                 <thead id="pt-thead" class="sticky top-0 bg-gray-50 z-10 shadow-sm border-b-2 text-center text-gray-600">
                                     <tr>
-                                        <th class="px-2 py-3 text-center min-w-[60px]">재계약</th>
+                                        <th class="px-2 py-3 text-center min-w-[60px]">상태</th>
                                         <th class="px-4 py-3 text-left min-w-[120px]">중개업소</th>
                                         <th class="px-3 py-3 min-w-[80px]">담당자</th>
                                         <th class="px-4 py-3 text-left min-w-[100px]">계약 만료일</th>
@@ -389,7 +395,7 @@
                                         <th class="px-2 py-3 min-w-[60px]">매매</th>
                                         <th class="px-2 py-3 min-w-[60px]">임대차</th>
                                         <th class="px-4 py-3 text-left min-w-[100px]">마지막 신청</th>
-                                        <th class="px-3 py-3 min-w-[60px]">상태</th>
+                                        <th class="px-3 py-3 min-w-[60px]">액션상태</th>
                                     </tr>
                                 </thead>
                                 <tbody id="pt-tbody" class="divide-y divide-gray-100 align-middle">
@@ -400,37 +406,37 @@
                         <!-- RIGHT NARROW: 4 Metric Cards -->
                         <div class="w-full lg:w-[280px] shrink-0 bg-gray-50 p-4 flex flex-col gap-3 overflow-y-auto border-t lg:border-t-0">
                             <!-- Metric 1: 정상 -->
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-[#00897B]">
-                                <h4 class="text-xs font-bold text-gray-500 mb-1">정상 활용 중</h4>
-                                <div class="flex justify-between items-end">
+                            <div class="bg-[#00897B]/5 rounded-xl border border-[#00897B]/20 p-4 flex flex-col transition-shadow hover:shadow-sm">
+                                <h4 class="text-xs font-bold text-[#00897B]/80 mb-1">정상 활용 중</h4>
+                                <div class="flex justify-between items-end mt-auto">
                                     <span class="text-3xl font-extrabold text-[#00897B] leading-none" id="p-stat-normal">0</span>
-                                    <span class="text-xs font-medium text-gray-400">2개월 내 사용</span>
+                                    <span class="text-xs font-medium text-[#00897B]/60">2개월 내 사용</span>
                                 </div>
                             </div>
                             
                             <!-- Metric 2: 주의 -->
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-[#F59E0B]">
-                                <h4 class="text-xs font-bold text-gray-500 mb-1">주의 <span class="font-medium text-[10px]">(2개월 미사용)</span></h4>
-                                <div class="flex justify-between items-end">
-                                    <span class="text-3xl font-extrabold text-[#F59E0B] leading-none" id="p-stat-warn">0</span>
+                            <div class="bg-[#00897B]/5 rounded-xl border border-[#00897B]/20 p-4 flex flex-col transition-shadow hover:shadow-sm">
+                                <h4 class="text-xs font-bold text-[#00897B]/80 mb-1">주의 <span class="font-medium text-[10px]">(2개월 미사용)</span></h4>
+                                <div class="flex justify-between items-end mt-auto">
+                                    <span class="text-3xl font-extrabold text-[#00897B] leading-none" id="p-stat-warn">0</span>
                                 </div>
                             </div>
                             
                             <!-- Metric 3: 긴급 -->
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-[#EF4444]">
-                                <h4 class="text-xs font-bold text-gray-500 mb-1 flex items-center gap-1">긴급 <i class="fa-solid fa-triangle-exclamation text-[#EF4444]"></i></h4>
-                                <div class="flex flex-col gap-1 mt-1">
-                                    <span class="text-3xl font-extrabold text-[#EF4444] leading-none" id="p-stat-urgent">0</span>
-                                    <span class="text-[10px] font-medium text-gray-500 leading-tight">3개월+ 미사용 또는<br>만료 30일 이내</span>
+                            <div class="bg-[#00897B]/5 rounded-xl border border-[#00897B]/20 p-4 flex flex-col transition-shadow hover:shadow-sm">
+                                <h4 class="text-xs font-bold text-[#00897B]/80 mb-1 flex items-center gap-1">긴급</h4>
+                                <div class="flex flex-col gap-1 mt-auto">
+                                    <span class="text-3xl font-extrabold text-[#00897B] leading-none" id="p-stat-urgent">0</span>
+                                    <span class="text-[10px] font-medium text-[#00897B]/60 leading-tight">3개월+ 미사용 또는<br>만료 30일 이내</span>
                                 </div>
                             </div>
 
                             <!-- Metric 4: 계약종료 -->
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-[#9CA3AF]">
-                                <h4 class="text-xs font-bold text-gray-500 mb-1">계약종료</h4>
-                                <div class="flex justify-between items-end">
-                                    <span class="text-3xl font-extrabold text-[#9CA3AF] leading-none" id="p-stat-expired">0</span>
-                                    <span class="text-xs font-medium text-gray-400">미갱신</span>
+                            <div class="bg-[#00897B]/5 rounded-xl border border-[#00897B]/20 p-4 flex flex-col transition-shadow hover:shadow-sm">
+                                <h4 class="text-xs font-bold text-[#00897B]/80 mb-1">계약종료</h4>
+                                <div class="flex justify-between items-end mt-auto">
+                                    <span class="text-3xl font-extrabold text-[#00897B] leading-none" id="p-stat-expired">0</span>
+                                    <span class="text-xs font-medium text-[#00897B]/60">미갱신</span>
                                 </div>
                             </div>
                         </div>
@@ -1519,13 +1525,14 @@
                 // Match search & filters
                 let passSearch = !leftSearch || searchTarget.includes(leftSearch);
                 let passFilter = true;
-                if (currentPremiumFilter === '활성') passFilter = statusCode !== 4;
+                if (currentPremiumFilter === '활성') passFilter = statusCode === 2 || statusCode === 3;
                 else if (currentPremiumFilter === '긴급') passFilter = statusCode === 1;
                 else if (currentPremiumFilter === '계약종료') passFilter = statusCode === 4;
 
                 if (passSearch && passFilter) {
+                    let isLive = statusCode !== 4;
                     premiumRenderList.push({
-                        bName, manager: pData.manager || '-', expiryDisp, totalApps, totalM, totalI, lastAppDisp, statusCode, statusLabel, statusBg, isRepay
+                        bName, manager: pData.manager || '-', expiryDisp, totalApps, totalM, totalI, lastAppDisp, statusCode, statusLabel, statusBg, isLive
                     });
                 }
             });
@@ -1539,16 +1546,21 @@
             document.getElementById('premium-count').innerText = `(활성 ${pActive}개)`;
 
             // Sort & Render Section 1
-            premiumRenderList.sort((a,b) => a.statusCode - b.statusCode);
+            const sortVal = document.getElementById('premium-sort') ? document.getElementById('premium-sort').value : 'asc';
+            if (sortVal === 'asc') {
+                premiumRenderList.sort((a,b) => a.bName.localeCompare(b.bName));
+            } else {
+                premiumRenderList.sort((a,b) => b.bName.localeCompare(a.bName));
+            }
             
             let pHTML = '';
             if (premiumRenderList.length === 0) pHTML = `<tr><td colspan="9" class="py-10 text-gray-400 text-center">데이터가 없습니다.</td></tr>`;
             premiumRenderList.forEach(item => {
                 let textClass = item.statusCode === 4 ? 'text-gray-400' : 'text-gray-800';
-                let repayCol = item.isRepay ? `<span class="bg-amber-50 text-amber-600 border border-amber-200 px-1.5 py-0.5 rounded text-[10px] font-bold">재계약</span>` : '-';
+                let liveCol = item.isLive ? `<span class="bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded text-[11px] font-bold">LIVE</span>` : `<span class="bg-gray-100 text-gray-500 border border-gray-200 px-2 py-0.5 rounded text-[11px] font-bold">종료</span>`;
                 pHTML += `
                     <tr class="hover:bg-gray-50 border-b border-gray-100 ${textClass} text-center">
-                        <td class="px-2 py-2">${repayCol}</td>
+                        <td class="px-2 py-2">${liveCol}</td>
                         <td class="px-4 py-2 font-bold text-left">${item.bName}</td>
                         <td class="px-3 py-2 text-gray-500">${item.manager}</td>
                         <td class="px-4 py-2 text-left">${item.expiryDisp}</td>
