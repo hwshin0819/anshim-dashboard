@@ -41,10 +41,17 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col sm:flex-row justify-between items-center py-3 gap-4">
                 
-                <!-- Title -->
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center text-white shadow-sm"><i class="fa-solid fa-chart-pie"></i></div>
-                    <span class="font-bold text-xl tracking-tight text-gray-900">안심케어 대시보드</span>
+                <!-- Title & Tabs -->
+                <div class="flex flex-col sm:flex-row items-center gap-6">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center text-white shadow-sm"><i class="fa-solid fa-chart-pie"></i></div>
+                        <span class="font-bold text-xl tracking-tight text-gray-900">안심케어 대시보드</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 border-b border-gray-200 self-end sm:self-auto w-full sm:w-auto">
+                        <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="px-2 py-2 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 transition-colors shrink-0">대시보드</button>
+                        <button onclick="switchTab('premium')" id="tab-btn-premium" class="px-2 py-2 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors shrink-0">프리미엄 중개사무소</button>
+                    </div>
                 </div>
 
                 <!-- Date Filters & Actions -->
@@ -112,7 +119,7 @@
             <p class="text-gray-700 font-semibold text-lg tracking-wide">데이터 동기화 중...</p>
         </div>
 
-        <div class="max-w-7xl mx-auto flex flex-col gap-6">
+        <div id="view-dashboard" class="max-w-7xl mx-auto flex flex-col gap-6">
 
             <!-- 1. TOP SECTION (2 columns, 50/50) -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -342,6 +349,58 @@
             </div>
 
         </div>
+
+        <!-- NEW PREMIUM VIEW -->
+        <div id="view-premium" class="max-w-[1600px] mx-auto flex flex-col gap-6 hidden h-full">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-[600px]">
+                
+                <!-- Left Panel: Premium Brokers -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden h-full">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0 flex justify-between items-center">
+                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fa-solid fa-gem text-blue-500"></i> 프리미엄 중개사무소 <span id="premium-count" class="text-gray-500 text-sm font-medium"></span>
+                        </h3>
+                        <div class="relative w-48">
+                            <input type="text" id="leftSearch" placeholder="검색..." oninput="renderPremiumTables()" class="w-full text-sm border shadow-sm rounded-md pl-8 pr-3 py-1.5 outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors border-gray-300">
+                            <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-magnifying-glass text-gray-400 text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-auto flex-1 bg-white">
+                        <table class="clean-table whitespace-nowrap text-xs w-full">
+                            <thead id="pt-thead" class="sticky top-0 bg-gray-50 z-10 shadow-sm border-b-2 text-center text-gray-600">
+                            </thead>
+                            <tbody id="pt-tbody" class="divide-y divide-gray-100 align-middle">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Single Payment Brokers -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden h-full">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0 flex justify-between items-center">
+                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fa-solid fa-file-invoice-dollar text-blue-500"></i> 건별 신청 중개사무소 <span id="single-count" class="text-gray-500 text-sm font-medium"></span>
+                        </h3>
+                        <div class="relative w-48">
+                            <input type="text" id="rightSearch" placeholder="검색..." oninput="renderPremiumTables()" class="w-full text-sm border shadow-sm rounded-md pl-8 pr-3 py-1.5 outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors border-gray-300">
+                            <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-magnifying-glass text-gray-400 text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-auto flex-1 bg-white">
+                        <table class="clean-table whitespace-nowrap text-xs w-full">
+                            <thead id="st-thead" class="sticky top-0 bg-gray-50 z-10 shadow-sm border-b-2 text-center text-gray-600">
+                            </thead>
+                            <tbody id="st-tbody" class="divide-y divide-gray-100 align-middle">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script>
@@ -401,9 +460,10 @@
                 document.getElementById('loading').classList.remove('hidden');
 
                 // Multiplex Data from both Management and Applications
-                const [resM, resR, resD] = await Promise.all([
+                const [resM, resR, resP, resD] = await Promise.all([
                     fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent('관리리스트')}?key=${API_KEY}`),
                     fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent('신청관리')}?key=${API_KEY}`),
+                    fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent('프리미엄중개사')}?key=${API_KEY}`).catch(e => null),
                     fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent('메타데이터')}?key=${API_KEY}`).catch(e => null)
                 ]);
 
@@ -421,7 +481,40 @@
                         }
                     } catch(e) { console.error('마지막 업데이트 파싱 에러', e); }
                 }
+
+                let rawPremiumData = [];
+                if (resP && resP.ok) {
+                    try {
+                        const jsonP = await resP.json();
+                        if (jsonP.values && jsonP.values.length > 0) {
+                            const pHeaders = jsonP.values[0];
+                            const hp = {
+                                name: pHeaders.indexOf('중개업소'),
+                                sido: pHeaders.indexOf('시/도'),
+                                sigungu: pHeaders.indexOf('시/군/구'),
+                                manager: pHeaders.indexOf('담당자'),
+                                end_date: pHeaders.indexOf('실제 종료일'),
+                                status: pHeaders.indexOf('계약상태'),
+                                rep_date: pHeaders.indexOf('재계약 결제 일자')
+                            };
+                            for (let i = 1; i < jsonP.values.length; i++) {
+                                const row = jsonP.values[i];
+                                rawPremiumData.push({
+                                    name: hp.name > -1 ? String(row[hp.name] || '').trim() : '',
+                                    sido: hp.sido > -1 ? String(row[hp.sido] || '').trim() : '',
+                                    sigungu: hp.sigungu > -1 ? String(row[hp.sigungu] || '').trim() : '',
+                                    manager: hp.manager > -1 ? String(row[hp.manager] || '').trim() : '',
+                                    end_date: hp.end_date > -1 ? String(row[hp.end_date] || '').trim() : '',
+                                    status: hp.status > -1 ? String(row[hp.status] || '').trim() : '',
+                                    rep_date: hp.rep_date > -1 ? String(row[hp.rep_date] || '').trim() : '',
+                                });
+                            }
+                        }
+                    } catch (e) { console.error('프리미엄중개사 파싱 에러', e); }
+                }
+                premiumBrokersSheetData = rawPremiumData;
                 
+
                 const yearSet = new Set(); // Global Year Tracker
 
                 function parseSheet(payload, isManagementSheet) {
@@ -821,15 +914,25 @@
                     let agencyName = arr[0];
                     let info = arr[1]; // {total, m, i}
                     let pBadge = '';
+                    let textStyle = 'text-gray-800';
                     if (agencyName && agencyName !== '미상' && agencyName !== '-') {
                         pBadge = globalPremiumBrokers.has(agencyName) 
                             ? `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#1A73E8] text-white text-[10px] font-bold shrink-0">P</span>` 
                             : `<span class="inline-flex items-center justify-center w-[16px] h-[16px] rounded-full bg-[#34A853] text-white text-[10px] font-bold shrink-0">N</span>`;
+                            
+                        const premiumRow = premiumBrokersSheetData.find(p => p.name === agencyName);
+                        if (premiumRow) {
+                            const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+                            const endStr = premiumRow.end_date.replace(/\./g, '-');
+                            const isRepay = premiumRow.rep_date !== '';
+                            const isExpired = endStr < todayStr && !isRepay;
+                            if (isExpired) textStyle = 'text-[#aaaaaa]';
+                        }
                     }
                     bHTML += `
                         <tr class="text-xs sm:text-sm">
                             <td class="${rNumClass} text-center px-1 sm:px-2">${idx+1}</td>
-                            <td class="text-left font-semibold text-gray-800 px-2 sm:px-4">
+                            <td class="text-left font-semibold ${textStyle} px-2 sm:px-4">
                                 <div class="flex items-center gap-1">
                                     <span class="truncate">${agencyName}</span>
                                     ${pBadge}
@@ -980,6 +1083,7 @@
             tableData = dynamicData;
             tableCurrentPage = 1;
             renderTable();
+            renderPremiumTables();
         }
 
         // ------------------------------------------------------------------
@@ -1108,6 +1212,163 @@
             const btnNext = document.getElementById('btn-next');
             if (btnPrev) btnPrev.disabled = tableCurrentPage === 1;
             if (btnNext) btnNext.disabled = tableCurrentPage === maxPage;
+        }
+
+        // ------------------------------------------------------------------
+        // PREMIUM TAB LOGIC
+        // ------------------------------------------------------------------
+        function switchTab(tabId) {
+            const vd = document.getElementById('view-dashboard');
+            const vp = document.getElementById('view-premium');
+            const bd = document.getElementById('tab-btn-dashboard');
+            const bp = document.getElementById('tab-btn-premium');
+            
+            const activeClass = ['border-blue-600', 'text-blue-600'];
+            const inactiveClass = ['border-transparent', 'text-gray-500'];
+
+            if (tabId === 'dashboard') {
+                vd.classList.remove('hidden');
+                vp.classList.add('hidden');
+                activeClass.forEach(c => bd.classList.add(c));
+                inactiveClass.forEach(c => bd.classList.remove(c));
+                inactiveClass.forEach(c => bp.classList.add(c));
+                activeClass.forEach(c => bp.classList.remove(c));
+            } else {
+                vd.classList.add('hidden');
+                vp.classList.remove('hidden');
+                activeClass.forEach(c => bp.classList.add(c));
+                inactiveClass.forEach(c => bp.classList.remove(c));
+                inactiveClass.forEach(c => bd.classList.add(c));
+                activeClass.forEach(c => bd.classList.remove(c));
+                
+                renderPremiumTables();
+            }
+        }
+
+        function generateMonthColumns() {
+            let cols = [];
+            let current = new Date(2024, 0, 1);
+            let now = new Date();
+            let end = new Date(now.getFullYear(), now.getMonth(), 1);
+            
+            while (current <= end) {
+                let m = `${current.getFullYear()}.${String(current.getMonth()+1).padStart(2, '0')}`;
+                let mKey = `${current.getFullYear()}-${String(current.getMonth()+1).padStart(2, '0')}`;
+                cols.push({ label: m, key: mKey });
+                current.setMonth(current.getMonth() + 1);
+            }
+            return cols;
+        }
+
+        function renderPremiumTables() {
+            if (!rawBaseData || rawBaseData.length === 0) return;
+            
+            const months = generateMonthColumns();
+            
+            // Build Theads
+            let thHTML = `<tr>
+                <th class="px-3 min-w-[150px]">중개업소</th>
+                <th class="px-2 whitespace-nowrap min-w-[60px]">시/도</th>
+                <th class="px-2 whitespace-nowrap min-w-[100px]">시/군/구</th>
+                <th class="px-2 min-w-[60px]">담당자</th>
+                <th class="px-2 whitespace-nowrap min-w-[80px]">실제 종료일</th>
+                <th class="px-2 whitespace-nowrap min-w-[70px]">계약상태</th>`;
+            months.forEach(m => {
+                thHTML += `<th class="px-2">${m.label}</th>`;
+            });
+            thHTML += `</tr>`;
+            
+            document.getElementById('pt-thead').innerHTML = thHTML;
+            document.getElementById('st-thead').innerHTML = thHTML;
+            
+            const appCounts = {};
+            const singleBrokersDataMap = {};
+            
+            rawBaseData.forEach(row => {
+                const bName = row.cVal || '';
+                if (!bName || bName === '미상') return;
+                
+                const qVal = row.qVal || '';
+                const mMatch = qVal.match(/(\d{4})[-./](\d{1,2})/);
+                if (mMatch) {
+                    const mKey = `${mMatch[1]}-${String(mMatch[2]).padStart(2, '0')}`;
+                    if (!appCounts[bName]) appCounts[bName] = {};
+                    appCounts[bName][mKey] = (appCounts[bName][mKey] || 0) + 1;
+                }
+                
+                const sVal = row.sVal || '';
+                if (sVal.includes('건별') || sVal.includes('단건')) {
+                    if (!singleBrokersDataMap[bName]) {
+                        let addrParts = (row.iVal || '').split(/\s+/);
+                        let sido = addrParts.length > 0 ? addrParts[0] : '';
+                        let sigungu = addrParts.length > 1 ? addrParts[1] : '';
+                        singleBrokersDataMap[bName] = {
+                            name: bName, sido: sido, sigungu: sigungu, manager: '-', end_date: '-', status: '-'
+                        };
+                    }
+                }
+            });
+
+            const leftSearch = document.getElementById('leftSearch').value.toLowerCase().trim();
+            const rightSearch = document.getElementById('rightSearch').value.toLowerCase().trim();
+
+            const highlightZero = (count) => {
+                if (count === 0) {
+                    return `<span class="bg-red-100 text-red-600 font-bold px-1.5 py-0.5 rounded">0</span>`;
+                }
+                return `<span class="text-gray-900 font-semibold">${count}</span>`;
+            };
+
+            const generateTr = (brokerObj) => {
+                const name = brokerObj.name;
+                let statusHTML = brokerObj.status;
+                if (statusHTML === '유효') {
+                    statusHTML = `<span class="text-green-600 font-bold bg-green-50/80 px-1.5 py-0.5 rounded">유효</span>`;
+                } else if (statusHTML === '해지') {
+                    statusHTML = `<span class="text-gray-500 font-bold bg-gray-100 px-1.5 py-0.5 rounded">해지</span>`;
+                } else if (statusHTML === '-') {
+                    statusHTML = `<span class="text-gray-400">-</span>`;
+                }
+                
+                let tdHTML = `<tr class="group hover:bg-blue-50/50 transition-colors text-center border-b border-gray-100 text-gray-700">
+                    <td class="px-3 font-semibold text-gray-900 text-left sticky left-0 bg-white group-hover:bg-blue-50/50 shadow-[1px_0_3px_-1px_rgba(0,0,0,0.1)]">${name}</td>
+                    <td class="px-2">${brokerObj.sido || '-'}</td>
+                    <td class="px-2 text-left">${brokerObj.sigungu || '-'}</td>
+                    <td class="px-2">${brokerObj.manager || '-'}</td>
+                    <td class="px-2">${brokerObj.end_date || '-'}</td>
+                    <td class="px-2">${statusHTML}</td>`;
+                
+                months.forEach(m => {
+                    let c = (appCounts[name] && appCounts[name][m.key]) || 0;
+                    tdHTML += `<td class="px-2">${highlightZero(c)}</td>`;
+                });
+                tdHTML += `</tr>`;
+                return tdHTML;
+            };
+
+            // LEFT
+            let leftCount = 0;
+            let leftHTML = '';
+            (premiumBrokersSheetData || []).forEach(p => {
+                if (leftSearch && !p.name.toLowerCase().includes(leftSearch)) return;
+                leftHTML += generateTr(p);
+                leftCount++;
+            });
+            if (leftCount === 0) leftHTML = `<tr><td colspan="${6 + months.length}" class="py-10 text-gray-400">데이터가 없습니다.</td></tr>`;
+            document.getElementById('pt-tbody').innerHTML = leftHTML;
+            document.getElementById('premium-count').innerText = `(${leftCount}건)`;
+
+            // RIGHT
+            let rightCount = 0;
+            let rightHTML = '';
+            Object.values(singleBrokersDataMap).forEach(s => {
+                if (rightSearch && !s.name.toLowerCase().includes(rightSearch)) return;
+                rightHTML += generateTr(s);
+                rightCount++;
+            });
+            if (rightCount === 0) rightHTML = `<tr><td colspan="${6 + months.length}" class="py-10 text-gray-400">건별 신청 데이터가 없습니다.</td></tr>`;
+            document.getElementById('st-tbody').innerHTML = rightHTML;
+            document.getElementById('single-count').innerText = `(${rightCount}건)`;
         }
 
     </script>

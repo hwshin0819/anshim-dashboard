@@ -12,7 +12,7 @@ const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
 
 async function uploadToGoogleSheets() {
   console.log('Starting Google Sheets upload process...');
-  
+
   if (!fs.existsSync(CREDENTIALS_PATH)) {
     throw new Error(`Credentials file not found at ${CREDENTIALS_PATH}`);
   }
@@ -29,7 +29,7 @@ async function uploadToGoogleSheets() {
     const workbook = xlsx.readFile(filePath);
     const firstSheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[firstSheetName];
-    
+
     // Convert to 2D array: array of arrays avoiding sparse rows
     let data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
 
@@ -39,7 +39,7 @@ async function uploadToGoogleSheets() {
     if (sheetName === '관리리스트' && data.length > 0) {
       const headers = data[0];
       const additionalCols = [
-        '계약일', '잔금일', '임대차만료일', '결제일시', '환불일시', 
+        '계약일', '잔금일', '임대차만료일', '결제일시', '환불일시',
         '결제상태', '청약번호', '증권번호', '발급완료일', '버전'
       ];
       additionalCols.forEach(colName => {
@@ -63,7 +63,7 @@ async function uploadToGoogleSheets() {
         spreadsheetId: SPREADSHEET_ID,
         range: `'${sheetName}'`,
       });
-    } catch(err) {
+    } catch (err) {
       console.warn(`Could not clear sheet '${sheetName}'. It might not exist or another error occurred: ${err.message}`);
     }
 
