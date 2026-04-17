@@ -358,12 +358,11 @@
                     <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="flex flex-col sm:flex-row sm:items-center gap-4 w-full">
                             <h3 class="font-bold text-gray-800 flex items-center gap-2 whitespace-nowrap">
-                                <i class="fa-solid fa-gem text-blue-500"></i> 프리미엄 중개사무소 <span id="premium-count" class="text-gray-500 text-sm font-medium"></span>
+                                <i class="fa-solid fa-gem text-blue-500"></i> 프리미엄 중개사무소
                             </h3>
                             <div class="flex items-center bg-gray-100 rounded-md p-1 shadow-inner text-xs font-semibold w-max" id="premium-filters">
                                 <button onclick="setPremiumFilter('전체')" class="px-3 py-1 rounded bg-white text-gray-800 shadow-sm transition-all" id="p-filter-all">전체</button>
-                                <button onclick="setPremiumFilter('활성')" class="px-3 py-1 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-200 transition-all" id="p-filter-active">활성</button>
-                                <button onclick="setPremiumFilter('긴급')" class="px-3 py-1 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-200 transition-all" id="p-filter-urgent">긴급</button>
+                                <button onclick="setPremiumFilter('주의')" class="px-3 py-1 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-200 transition-all" id="p-filter-warn">주의</button>
                                 <button onclick="setPremiumFilter('계약종료')" class="px-3 py-1 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-200 transition-all" id="p-filter-expired">계약종료</button>
                             </div>
                         </div>
@@ -428,8 +427,7 @@
                 <!-- Bottom Panel: Single Payment Brokers -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden w-full min-h-[400px]">
                     <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 shrink-0 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                        <h3 class="font-bold text-gray-800 flex items-center gap-2 whitespace-nowrap">
-                            <i class="fa-solid fa-file-invoice-dollar text-blue-500"></i> 건별 신청 중개사무소 <span id="single-count" class="text-gray-500 text-sm font-medium"></span>
+                            <i class="fa-solid fa-file-invoice-dollar text-blue-500"></i> 건별 신청 중개사무소
                         </h3>
                         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto overflow-x-auto pb-1 sm:pb-0">
                             <!-- 3 Stat Boxes -->
@@ -766,8 +764,8 @@
 
         function setPremiumFilter(filterName) {
             currentPremiumFilter = filterName;
-            const filters = ['전체', '활성', '긴급', '계약종료'];
-            const eIds = ['p-filter-all', 'p-filter-active', 'p-filter-urgent', 'p-filter-expired'];
+            const filters = ['전체', '주의', '계약종료'];
+            const eIds = ['p-filter-all', 'p-filter-warn', 'p-filter-expired'];
             
             filters.forEach((f, idx) => {
                 const btn = document.getElementById(eIds[idx]);
@@ -1544,8 +1542,7 @@
                 // Match search & filters
                 let passSearch = !leftSearch || searchTarget.includes(leftSearch);
                 let passFilter = true;
-                if (currentPremiumFilter === '활성') passFilter = statusCode === 2 || statusCode === 3;
-                else if (currentPremiumFilter === '긴급') passFilter = statusCode === 1;
+                if (currentPremiumFilter === '주의') passFilter = statusCode === 2;
                 else if (currentPremiumFilter === '계약종료') passFilter = statusCode === 4;
 
                 if (passSearch && passFilter) {
@@ -1563,7 +1560,6 @@
             let pActive = pNormal + pWarn;
             const psa = document.getElementById('p-stat-active');
             if (psa) psa.innerText = pActive;
-            document.getElementById('premium-count').innerText = `(활성 ${pActive}개)`;
 
             // Sort & Render Section 1
             const pCols = [
@@ -1672,7 +1668,6 @@
             });
             if (sCount === 0) sHTML = `<tr><td colspan="6" class="py-10 text-gray-400 text-center">데이터가 없습니다.</td></tr>`;
             document.getElementById('st-tbody').innerHTML = sHTML;
-            document.getElementById('single-count').innerText = `(${singleList.length}개)`;
         }
 
     </script>
